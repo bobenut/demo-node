@@ -60,7 +60,7 @@ app.use(function(err, req, res, next) {
 });
 
 master.begin();
-// worker.begin();
+worker.begin();
 // requester.begin();
 
 module.exports = app;
