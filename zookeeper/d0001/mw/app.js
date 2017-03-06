@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var master = require('./master');
+var worker = require('./worker');
+var requester = require('./requester');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -58,5 +60,7 @@ app.use(function(err, req, res, next) {
 });
 
 master.begin();
+// worker.begin();
+// requester.begin();
 
 module.exports = app;
