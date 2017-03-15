@@ -18,8 +18,8 @@ var master = {};
 
 
 master.begin = function(){
-	zkClient = zookeeper.createClient('172.16.16.220:2181', {sessionTimeout:5000});
-	// zkClient = zookeeper.createClient('172.13.12.28:2181', {sessionTimeout:5000});
+	// zkClient = zookeeper.createClient('172.16.16.220:2181', {sessionTimeout:5000});
+	zkClient = zookeeper.createClient('172.16.24.208:2181', {sessionTimeout:5000});
 
 	zkClient.on('state', onZkClientState);
 
@@ -85,18 +85,29 @@ function catchMasterWatcher(event){
 function doResponsiblity(){
 	var synces = [syncWorkers(), syncRequesters()];
 	Promise.all(synces).then(function(){
-		console.log('master::doResponsiblity=>do synces ok:');
+		return new Promise(function(resolve, reject){
+			console.log('master::doResponsiblity=>do synces ok:');
+			resolve();
+		});
+	}).then(handleNoAssignedTasks)
+	.then(SetTasksWatcher)
+	.catch(function(error){
+		console.log('master::doResponsiblity=>do synces error:' + error.message);
+	});
+}
+
+function handleNoAssignedTasks(){
+	return new Promise(function(resolve, reject){
 		getTaskNames()
 			.then(assignTasks)
 			.then(function(results){
-				console.log('master::doResponsiblity=>assign tasks ok');
+				console.log('master::handleNoAssignedTasks=>assign tasks ok');
+				resolve(results);
 			})
-			.catch(function(error){
-				console.log('master::doResponsiblity=>assign tasks error: %s', error.message);
-			});
-
-	}).catch(function(error){
-		console.log('master::doResponsiblity=>do synces error:' + error.message);
+		.catch(function(error){
+			console.log('master::handleNoAssignedTasks=>assign tasks error: %s', error.message);
+			reject(error);		
+		});
 	});
 }
 
@@ -104,53 +115,43 @@ function getTaskNames(){
 	return new Promise(function(resolve, reject){
 		zkClient.getChildren(
 			'/zht/status-collaboration/tasks',
-			tasksWatcher,
 			function(error, children, state){
 				if(error){
+					console.log('master::getTaskNames=>error: %s', error.message);
 					reject(error);
 					return;
 				}
 
+				console.log('master::getTaskNames=>ok: %s', children);
 				resolve(children);			
 			});
 	});
 }
 
-function tasksWatcher(event){
-	// if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
-		console.log('master::tasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
-			event.getType(),event.getName(),event.getPath(),event.toString());
-	// }
-}
-
 function assignTasks(taskNames){
-	return new Promise(function(resolve, reject){
+	return new Promise(function(resolve1, reject1){
 		Promise.map(taskNames, function(taskName, index){
-			return new Promise(function(resolve, reject){
+			return new Promise(function(resolve2, reject2){
 				getTaskData(taskName)
-					.then(taskIsNotYetAssigned,function(error){
-						console.log('master::assignTasks=>assign %s, getTaskData is reject: %s', taskName, error.message);
-						reject(error);
-					})
-					.then(assignTask,function(error){
-						console.log('master::assignTasks=>assign %s, taskIsNotYetAssigned is reject: %s', taskName, error.message);
-						reject(error);
-					})
+					.then(taskIsNotYetAssigned)
+					.then(assignTask)
 					.then(function(results){
-						console.log('master::assignTasks=>assign %s, assignTask is ok: %s', taskName, results);
-						resolve(results);
-					}, function(error){
-						console.log('master::assignTasks=>assign %s, assignTask is reject: %s', taskName, error.message);
-						reject(error);
+						console.log('master::assignTasks.p1=>assign %s, assignTask is ok: %s', taskName, results);
+						resolve2(results);
+					}).catch(function(error){
+						console.log('master::assignTasks.p1=>do %s catch error: %s', taskName, error.message);
+						//reject2(error);
+						resolve2();
 					});
 				});
 		}).then(function(results){
-			resolve(results)
+			console.log('master::assignTasks.p2=>assignTask is ok: %s', results);
+			resolve1(results)
 		}, function(error){
-			reject(error);
+			console.log('master::assignTasks.p2=>error: %s', error.message);
+			reject1(error);
 		});
 	});
-
 }
 
 function assignTask(task){
@@ -163,8 +164,10 @@ function assignTask(task){
 		var taskNo = takeOutTaskNo(task.taskName);
 		var workerName = allocateWorkerForTask(taskNo);
 
-		var workerAssignPath = PATH_ASSIGN + workerName;
+		var workerAssignPath = PATH_ASSIGN + '/' + workerName + '/' + task.taskName;
+		// console.log('master::assignTask=>workerAssignPath: %s', workerAssignPath); 
 		task.taskData.assignToWho = workerName;
+		// console.log('master::assignTask=>taskPath: %s', task.taskPath); 
 		zkClient.transaction()
 			.create(
 				workerAssignPath,
@@ -183,23 +186,27 @@ function assignTask(task){
 				console.log('master::assignTask=>commit ok: %s', results); 
 				resolve(results);
 			});
+	});
 }
 
 function getTaskData(taskName){
 	return new Promise(function(resolve, reject){
 		var taskPath = PATH_TASKS + '/' + taskName;
-		zkClient.getChildren(
+		zkClient.getData(
 			taskPath,
 			function(error, data, state){
 				if(error){
+					consle.log('master::getTaskData=>get %s\'s data error: %s', taskName, error.message);
 					reject(error);
 					return;
 				}
 
+				console.log('master::getTaskData=>get %s\'s data ok, data: ', taskName, JSON.parse(data.toString())); 
+
 				resolve({
 					taskName: taskName,
 					taskPath: taskPath,
-					taskData: JSON.parse(data.toString()});			
+					taskData: JSON.parse(data.toString())});			
 			});
 	});
 }
@@ -216,15 +223,18 @@ function taskIsNotYetAssigned(task){
 
 
 function takeOutTaskNo(taskName){
-	return parseInt(taskName.slice(4));
+	var taskNo = parseInt(taskName.slice(4));
+	// console.log('master::takeOutTaskNo=>taskNo=%s', taskNo);
+
+	return taskNo;
 }
 
 function allocateWorkerForTask(taskNo){
-	return 'worker' + (taskNo % workers.count + 1);
+	return 'worker' + (taskNo % Object.getOwnPropertyNames(workers).length + 1);
 }
 
 function isExistWorkers(){
-	return workers.count > 0;
+	return Object.getOwnPropertyNames(workers).length > 0;
 }
 
 
@@ -302,8 +312,8 @@ function getRequesters(){
 function memoryPersistRequsters(requesterNames){
 	for(var i=0,requesterName;requesterName=requesterNames[i++];){
 		var requesterPath = PATH_REQUESTERS + '/' + requesterName;
-		if(!workers[requesterPath]){
-			workers[requesterPath] = {};
+		if(!requesters[requesterPath]){
+			requesters[requesterPath] = {};
 			console.log('master::memoryPersistRequsters=>add requester: %s', requesterPath);
 		}
 	}
@@ -316,6 +326,38 @@ function requestersWatcher(event){
 	// }
 }
 
+function SetTasksWatcher(event){
+	return new Promise(function(resolve, reject){
+		zkClient.getChildren(
+			'/zht/status-collaboration/tasks',
+			tasksWatcher,
+			function(error, children, state){
+				if(error){
+					console.log('master::SetTasksWatcher=>set tasks watcher error: %s', error.message);
+					reject(error);
+					return;
+				}
 
+				console.log('master::SetTasksWatcher=>set tasks watcher ok: %s', children);
+				resolve();			
+			});
+	});
+}
+
+function tasksWatcher(event){
+	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
+		console.log('master::tasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
+			event.getType(),event.getName(),event.getPath(),event.toString());
+
+		handleNoAssignedTasks()
+			.then(function(results){
+				console.log('master::tasksWatcher=>reset tasks watcher ok');
+			})
+			.catch(function(error){
+				console.log('master::tasksWatcher=>reset tasks watcher error: %s', error.message);
+			})
+			.finally(SetTasksWatcher);
+	}
+}
 
 module.exports = master;
