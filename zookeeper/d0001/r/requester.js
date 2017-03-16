@@ -9,8 +9,8 @@ var requester = {};
 
 
 requester.begin = function(){
-	// zkClient = zookeeper.createClient('172.16.16.220:2181', {sessionTimeout:5000});
-	zkClient = zookeeper.createClient('172.16.24.208:2181', {sessionTimeout:5000});
+	zkClient = zookeeper.createClient('172.16.16.220:2181', {sessionTimeout:5000});
+	// zkClient = zookeeper.createClient('172.16.24.208:2181', {sessionTimeout:5000});
 
 	zkClient.on('state', onZkClientState);
 
@@ -22,6 +22,8 @@ function onZkClientState(state){
 		sessionId = zkClient.getSessionId().toString('hex');
 		console.log('requester connected server, sessionId=%s', sessionId.toString('hex'));
 		registerRequester();
+
+		registerRequesterResponse();
 	}
 }
 
@@ -86,6 +88,26 @@ function submitTaskCallback(error, state){
 		console.log('submitTaskCallback=>error:' + error.message);
 		return;
 	}
+}
+
+function registerRequesterResponse(){
+	return new Promise(function(resolve, reject){
+		zkClient.create(
+			'/zht/status-collaboration/response/'+requesterName,
+			new Buffer(sessionId || ''),
+			zookeeper.CreateMode.PERSISTENT,
+			function(error, path){
+				if(error){
+					console.log('%s::registerRequesterResponse.Callback=>register in response warnning: %s',
+						requesterName, error.message);
+					resolve();
+					return;
+				}
+
+				console.log('%s::registerRequesterResponse.Callback=>registered in response ok', requesterName);
+				resolve();
+			});
+	});
 }
 
 module.exports = requester;
