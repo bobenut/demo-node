@@ -1,6 +1,7 @@
 var zookeeper = require('node-zookeeper-client');
 var Promise = require('bluebird');
 const RequesterWatcherEventEmitter = require('events');
+const config = require('./config');
 
 var PATH_WORKERS = '/zht/status-collaboration/workers';
 var PATH_REQUESTERS = '/zht/status-collaboration/requesters';
@@ -15,6 +16,8 @@ var requesters = {};
 var assignedTasks = {};
 
 var master = {};
+
+
 
 
 var requestersWatcherEventEmitter = new RequesterWatcherEventEmitter();
@@ -42,7 +45,7 @@ function onZkClientState(state){
 
 function catchMaster(){
 	zkClient.create(
-			'/zht/status-collaboration/master/lock',
+			config.masterLockPath,
 			new Buffer(sessionId || ''),
 			zookeeper.CreateMode.EPHEMERAL,
 			catchMasterCallback);
@@ -51,31 +54,39 @@ function catchMaster(){
 
 function catchMasterCallback(error, path){
 	if(error){
-		console.log('master::catchMasterCallback=>master is exists failed:' + error.message);
+		// console.log('master::catchMasterCallback=>master is exists failed:' + error.message);
+		if(error.message == 'NODE_EXISTS'){
+			console.log('%s=> master is existed', config.masterName);
+		}else{
+			console.erorr('%s=> catch master error: %s', config.masterName, error.message);
+		}
 		checkMasterIsExist();
 		return;
 	}
 
-	console.log('master::catchMasterCallback=>catched master, i am(%s)', sessionId);
+	// console.log('master::catchMasterCallback=>catched master, i am(%s)', sessionId);
+	console.log('%s=> i am master', config.masterName);
 
 	doResponsiblity();
 }
 
-function checkMasterIsExist(){
+function setCatchMasterWatcher(){
 	zkClient.exists(
-		'/zht/status-collaboration/master/lock',
+		config.masterLockPath,
 		catchMasterWatcher,
-		checkMasterIsExistCallback);
+		setCatchMasterWatcherCallback);
 }
 
-function checkMasterIsExistCallback(error, state){
+function setCatchMasterWatcherCallback(error, state){
 	if(error){
-		console.log('master::checkMasterIsExistCallback=>error:' + error.message);
+		// console.log('master::checkMasterIsExistCallback=>error:' + error.message);
+		console.erorr('%s=>set watcher to catch master error: %s', config.masterName, error.message);
 		return;
 	}
 
 	if(state){
-		console.log('master::checkMasterIsExistCallback=>master is exists');
+		// console.log('master::checkMasterIsExistCallback=>master is exists');
+		// console.log('%s=> master is existed', config.masterName);
 	}else{
 		catchMaster();
 	}
@@ -83,7 +94,7 @@ function checkMasterIsExistCallback(error, state){
 
 function catchMasterWatcher(event){
 	if(event.getType() === zookeeper.Event.NODE_DELETED){
-		console.log('master::catchMasterWatcher=>begin catch master');
+		// console.log('master::catchMasterWatcher=>begin catch master');
 		catchMaster();
 	}
 }
