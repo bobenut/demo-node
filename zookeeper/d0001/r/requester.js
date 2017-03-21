@@ -10,8 +10,8 @@ var requester = {};
 
 
 requester.begin = function(){
-	zkClient = zookeeper.createClient('172.13.2.204:2181', {sessionTimeout:5000});
-	// zkClient = zookeeper.createClient('172.16.16.220:2181', {sessionTimeout:5000});
+	// zkClient = zookeeper.createClient('172.13.2.204:2181', {sessionTimeout:5000});
+	zkClient = zookeeper.createClient('172.16.16.220:2181', {sessionTimeout:5000});
 	// zkClient = zookeeper.createClient('172.16.24.208:2181', {sessionTimeout:5000});
 
 	zkClient.on('state', onZkClientState);
