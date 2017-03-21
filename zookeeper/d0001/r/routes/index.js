@@ -9,8 +9,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/task/overtime', function(req, res, next){
-	// console.log("query: %s", JSON.stringify(req.query, null, 2));
-	// console.log("body: %s", JSON.stringify(req.body, null, 2));
+	 console.log("query: %s", JSON.stringify(req.query, null, 2));
+	 console.log("body: %s", JSON.stringify(req.body, null, 2));
 	var followOvertimeTask = {
 		name:'followOvertime',
 		time:req.body.time,
@@ -20,8 +20,9 @@ router.post('/task/overtime', function(req, res, next){
 		doneReason:''
 	};
 
-	requester.submitTask(followOvertimeTask);
 	console.log("followOvertimeTask: %s", JSON.stringify(followOvertimeTask, null, 2));
+	requester.submitTask(followOvertimeTask);
+	
 	res.end();
 })
 
