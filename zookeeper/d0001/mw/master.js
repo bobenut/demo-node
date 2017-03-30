@@ -106,13 +106,16 @@ function doResponsiblity(){
 		// console.log('master::doResponsiblity=>do synces error:' + error.message);
 	});
 
+	workersWatcherEventEmitter.on('comein', onWorkerComein);
+	workersWatcherEventEmitter.on('goout', onWorkerGoout);
 	requestersWatcherEventEmitter.on('comein', onRequesterComein);
 	requestersWatcherEventEmitter.on('goout', onRequesterGoout);
 }
 
 function handleNoAssignedTasks(){
 	return new Promise(function(resolve, reject){
-		getTaskNames()
+		checkIsCouldAssignTask()
+			.then(getTaskNames)
 			.then(assignTasks)
 			.then(function(results){
 				// console.log('master::handleNoAssignedTasks=>assign tasks ok');
@@ -120,8 +123,28 @@ function handleNoAssignedTasks(){
 			})
 		.catch(function(error){
 			// console.log('master::handleNoAssignedTasks=>assign tasks error: %s', error.message);
+			console.error('%s=> handle no assigned tasks error %s', config.masterName, error.message);
 			reject(error);		
 		});
+	});
+}
+
+function checkIsCouldAssignTask(){
+	return new Promise(function(resolve, reject){
+		var workerCount = Object.hasOwnPropertyNames(workers).length;
+		var requesterCount = Object.hasOwnPropertyNames(requesters).length;
+
+		if(workerCount > 0 && requesterCount > 0){
+			resolve();
+		}else if(workerCount == 0){
+			reject(new Error('NO_WORKERS'));
+
+		}else if(requesterCount == 0){
+			reject(new Error('NO_REQUESTERS'));
+
+		}else{
+			reject(new Error('CHECK_IS_COULD_ASSIGN_TASK_FAILED'));
+		}
 	});
 }
 
@@ -316,10 +339,49 @@ function getWorkers(){
 }
 
 function workersWatcher(event){
-	// if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
+	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
 		console.log('master::workersWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
 			event.getType(),event.getName(),event.getPath(),event.toString());
-	// }
+
+		getWorkers()
+			.then(checkIsAddedWorker)
+			.then(NotifyWorkerIsAdded)
+			.catch(function(error){
+				console.error('%s=> workers changed, get/check/notify changing error: %s', config.masterName, error.message);
+			});
+	}
+}
+
+function checkIsAddedWorker(workerNames){
+	return new Promise(function(resolve, reject){
+		var addedWorkers = [];
+		for(var i=0,workerName;workerName=workerNames[i++];){
+			var workerPath = config.workersPath + '/' + workerName;
+			if(!workers[workerPath]){
+				addedWorkers.push(workerName);
+			}
+		}
+
+		if(addedWorkers.length > 0){
+			resolve(addedWorkers);
+		}else{
+			reject(new Error('NO_ADDED_WORKERS'));
+		}
+	});
+
+}
+
+function NotifyWorkerIsAdded(addedWorkerNames){
+	return new Promise(function(resolve, reject){
+		if(addedWorkerNames.length > 0){
+			workersWatcherEventEmitter.emit('comein', addedWorkerNames);
+			resolve();
+		}else{
+			reject(new Error('NO_ADDED_WORKERS'));
+		}
+		
+	});
+
 }
 
 function syncRequesters(){
@@ -371,6 +433,39 @@ function requestersWatcher(event){
 	}
 }
 
+function checkIsAddedRequester(requesterNames){
+	return new Promise(function(resolve, reject){
+		var addedRequesters = [];
+		for(var i=0,requesterName;requesterName=requesterNames[i++];){
+			var requesterPath = config.requestersPath + '/' + requesterName;
+			if(!requesters[requesterPath]){
+				addedRequesters.push(requesterName);
+				// console.log('master::memoryPersistRequsters=>add requester: %s', requesterPath);
+			}
+		}
+
+		if(addedRequesters.length > 0){
+			resolve(addedRequesters);
+		}else{
+			reject(new Error('NO_ADDED_REQUESTERS'));
+		}
+	});
+
+}
+
+function NotifyWorkerIsAdded(addedRequesterNames){
+	return new Promise(function(resolve, reject){
+		if(addedRequesterNames.length > 0){
+			requestersWatcherEventEmitter.emit('comein', addedRequesterNames);
+			resolve();
+		}else{
+			reject(new Error('NO_ADDED_REQUESTERS'));
+		}
+		
+	});
+
+}
+
 function SetTasksWatcher(event){
 	return new Promise(function(resolve, reject){
 		zkClient.getChildren(
@@ -394,15 +489,14 @@ function tasksWatcher(event){
 	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
 		// console.log('master::tasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
 		// 	event.getType(),event.getName(),event.getPath(),event.toString());
-
-		handleNoAssignedTasks()
+		SetTasksWatcher()
+			.then(handleNoAssignedTasks)
 			.then(function(results){
 				// console.log('master::tasksWatcher=>reset tasks watcher ok');
 			})
 			.catch(function(error){
 				// console.log('master::tasksWatcher=>reset tasks watcher error: %s', error.message);
 			})
-			.finally(SetTasksWatcher);
 	}
 }
 
@@ -670,9 +764,26 @@ function removeTask(taskDetial){
 	});
 }
 
+function onWorkerComein(addedWorkerNames){
+	console.log('%s=> workers <%s> came in', config.masterName, addedWorkerNames);
+	handleNoAssignedTasks()
+		.catch(function(error){
+			console.error('%s=> After workers came in, handle no assigned tasks error: %s', 
+				config.masterName, error.message);
+		});
+}
 
-function onRequesterComein(){
+function onWorkerGoout(){
 	
+}
+
+function onRequesterComein(addedRequesterNames){
+	console.log('%s=> requesters <%s> came in', config.masterName, addedRequesterNames);
+	handleNoAssignedTasks()
+		.catch(function(error){
+			console.error('%s=> After requesters came in, handle no assigned tasks error: %s', 
+				config.masterName, error.message);
+		});	
 }
 
 function onRequesterGoout(){

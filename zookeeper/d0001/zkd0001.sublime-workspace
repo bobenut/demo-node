@@ -3,18 +3,225 @@
 	{
 		"selected_items":
 		[
+			[
+				"reques",
+				"requesterName"
+			],
+			[
+				"req",
+				"requestersWatcherEventEmitter"
+			],
+			[
+				"requesterWa",
+				"requestersWatcher"
+			],
+			[
+				"requeset",
+				"requester"
+			],
+			[
+				"remo",
+				"removeTask"
+			],
+			[
+				"getTask",
+				"getTaskDataByPath"
+			],
+			[
+				"assignd",
+				"assignedPath"
+			],
+			[
+				"taskD",
+				"taskDetail"
+			],
+			[
+				"crea",
+				"CreateDoneNodeForExecutedTask"
+			],
+			[
+				"reque",
+				"requesterName"
+			],
+			[
+				"requ",
+				"requesterName"
+			],
+			[
+				"assi",
+				"assignedTaskPath"
+			],
+			[
+				"assign",
+				"assign"
+			],
+			[
+				"don",
+				"doneNodePath"
+			],
+			[
+				"task",
+				"taskJob"
+			],
+			[
+				"ta",
+				"taskDetail"
+			],
+			[
+				"is",
+				"isTimeNotValid"
+			],
+			[
+				"tim",
+				"time"
+			],
+			[
+				"emi",
+				"emitEnd"
+			],
+			[
+				"taskj",
+				"taskJobs"
+			],
+			[
+				"w",
+				"workerName"
+			],
+			[
+				"wo",
+				"workers"
+			],
+			[
+				"proto",
+				"protolink"
+			],
+			[
+				"over",
+				"overtimeTaskJob"
+			],
+			[
+				"E",
+				"EventEmitter"
+			],
+			[
+				"taskN",
+				"taskName"
+			],
+			[
+				"wor",
+				"workerName"
+			],
+			[
+				"ret",
+				"reject"
+			],
+			[
+				"tas",
+				"taskName"
+			],
+			[
+				"work",
+				"worker"
+			],
+			[
+				"al",
+				"allocateWorkerForTask"
+			],
+			[
+				"gettas",
+				"getTaskData"
+			],
+			[
+				"PA",
+				"PATH_TASKS"
+			],
+			[
+				"pro",
+				"Promise"
+			],
+			[
+				"ass",
+				"assignToWho"
+			],
+			[
+				"P",
+				"Promise"
+			],
+			[
+				"syn",
+				"syncRequesters"
+			],
+			[
+				"sy",
+				"syncWorkers"
+			],
+			[
+				"Pat",
+				"PATH_REQUESTERS"
+			],
+			[
+				"vo",
+				"voteMaster"
+			],
+			[
+				"l",
+				"log"
+			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"contents": "",
-			"file": "mw/index.js",
-			"file_size": 0,
-			"file_write_time": 131327507239912353,
+			"file": "mw/app.js",
 			"settings":
 			{
-				"buffer_size": 0,
+				"buffer_size": 1542,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "mw/config.js",
+			"settings":
+			{
+				"buffer_size": 422,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "mw/master.js",
+			"settings":
+			{
+				"buffer_size": 19775,
+				"encoding": "UTF-8",
+				"line_ending": "Unix",
+				"name": "master"
+			}
+		},
+		{
+			"file": "mw/worker.js",
+			"settings":
+			{
+				"buffer_size": 11591,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "r/requester.js",
+			"settings":
+			{
+				"buffer_size": 8722,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "r/routes/index.js",
+			"settings":
+			{
+				"buffer_size": 697,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -27,12 +234,16 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 0.0,
+		"height": 392.0,
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"",
+				"Bookmarks: Select All"
+			]
 		],
-		"width": 0.0
+		"width": 467.0
 	},
 	"console":
 	{
@@ -52,11 +263,18 @@
 	},
 	"file_history":
 	[
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/mw/package.json",
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/r/bin/www",
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/r/app.js",
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/r/package.json",
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/mw/requester.js",
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/mw/bin/www",
+		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/mw/index.js",
 		"/home/kxh/github.bobenut/demo-node/zookeeper/d0001/mw/npm-debug.log"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 25.0
 	},
 	"find_in_files":
 	{
@@ -70,6 +288,134 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"erorr",
+			"getTaskDataByPath",
+			"given",
+			"taskData",
+			"taskDaa",
+			"taskData",
+			"isTaskNotDoing",
+			"taskName",
+			"getTaskDataByPath",
+			"taskName",
+			"taskData",
+			"TaskData",
+			"taskData",
+			"setAssignedTasksWatcher",
+			"task",
+			"taskNodeName",
+			"askJobBase",
+			"assignTask",
+			"assignTasks",
+			"assignTask",
+			"P1",
+			"config",
+			"masterLockPath",
+			"requestersPath",
+			"workersPath",
+			"requesterName",
+			"workerName",
+			"executeTask",
+			"watcher",
+			"workerName",
+			"worker",
+			"SetTasksWatcher",
+			"isTaskNotDone",
+			"registerWorkerAssign",
+			"registerWorkerCallback",
+			"registerWorker",
+			"setWorkerWatcher",
+			"getTaskDetail",
+			"isTaskNotDoing",
+			"isTaskNotDone",
+			"doAllTasksJob",
+			"doAssignedAllTask",
+			"registerWorkerAssign",
+			"doAssignedAllTask",
+			"master",
+			"PATH_TASKS",
+			"var",
+			"PATH_ASSIGN",
+			"\tvar workerAssignPath = PATH_ASSIGN + '/' + task.taskData.assignToWho + '/' + task.taskName;\n",
+			"PATH_ASSIGN",
+			"PATH_RESPONSE",
+			"PATH_REQUESTERS",
+			"var",
+			"PATH_REQUESTERS",
+			"PATH_WORKERS",
+			"responsedTaskWatcher",
+			"getTaskDataByPath",
+			"SetResponsedTaskWatcher",
+			"taskDoneTaskIntoRequester",
+			"getAssignedTaskData",
+			"t",
+			"T",
+			"getAssignedTaskData",
+			"setAssignedTasksWatcher",
+			"error",
+			"getAssignedTaskData",
+			"setAssignedTasksWatcher",
+			"tasksAssignPath",
+			"PATH_ASSIGN",
+			"getTaskDataByName",
+			"taskIsNotYetAssigned",
+			"requestersWatcherEventEmitter",
+			"syncWorkers",
+			"');\n",
+			"checkMasterIsExist",
+			"master",
+			"taskDetail",
+			"getTaskDataByPath",
+			"**",
+			"taskDetail",
+			"isResponsedTaskDone",
+			"getTaskDataByPath",
+			"taskDoneTaskIntoRequester",
+			"SetResponsedTaskWatcher",
+			"taskDoneTaskIntoRequester",
+			"SetResponsedTaskWatcher",
+			"responsedTaskWatcher",
+			"removeTask",
+			"getTaskData",
+			"getTaskDataByPath",
+			"onRequesterComein",
+			"onRequesterGoout",
+			"\nfunction onRequesterComein(){\n\t",
+			"EventEmitter",
+			"syncRequesters",
+			"memoryPersistRequsters",
+			"taskIsNotYetAssigned",
+			"syncRequesters",
+			"memoryPersistWorkers",
+			"results",
+			"workerName",
+			"finally",
+			"handleResponsedTasks",
+			"executeTask",
+			"getTaskDetail",
+			"isTaskNotDone",
+			"assignToWho",
+			"PATH_REQUESTERS",
+			"assign",
+			"registerWorkerAssign",
+			"sessionId",
+			"workerName",
+			"responseTaskPath",
+			"taskDetail",
+			"taskData",
+			"taskDoneTaskIntoRequester",
+			"reponseTaskPath",
+			"taskData",
+			"task",
+			"taskName",
+			"assignedTaskPath",
+			"workers",
+			"requesters",
+			"workers",
+			"assignedTasks",
+			"handleNoAssignedTasks",
+			"assignedTasks",
+			"handleNoAssignedTasks"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -81,30 +427,60 @@
 		"reverse": false,
 		"show_context": true,
 		"use_buffer2": true,
-		"whole_word": false,
+		"whole_word": true,
 		"wrap": true
 	},
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "mw/index.js",
+					"file": "mw/app.js",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 0,
+						"buffer_size": 1542,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								1378,
+								1378
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 108.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "mw/config.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 422,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								273,
+								273
 							]
 						],
 						"settings":
@@ -115,7 +491,121 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "mw/master.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19775,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16153,
+								16153
+							]
+						],
+						"settings":
+						{
+							"auto_name": "master",
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 7634.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "mw/worker.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11591,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7024,
+								7024
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 2978.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "r/requester.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8722,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								453,
+								453
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "r/routes/index.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 697,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								520,
+								520
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
 					"type": "text"
 				}
 			]
@@ -123,7 +613,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 22.0
 	},
 	"input":
 	{
@@ -160,7 +650,7 @@
 	"project": "zkd0001.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 46.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -195,7 +685,7 @@
 	{
 	},
 	"show_minimap": true,
-	"show_open_files": false,
+	"show_open_files": true,
 	"show_tabs": true,
 	"side_bar_visible": true,
 	"side_bar_width": 150.0,
