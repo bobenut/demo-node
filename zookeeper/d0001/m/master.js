@@ -109,14 +109,13 @@ function doResponsiblity(){
 		// console.log('master::doResponsiblity=>do synces error:' + error.message);
 	});
 
-	workersWatcherEventEmitter.on('comein', onWorkerComein);
-	workersWatcherEventEmitter.on('goout', onWorkerGoout);
-	requestersWatcherEventEmitter.on('comein', onRequesterComein);
+	workersWatcherEventEmitter.on('camein', onWorkerCamein);
+	workersWatcherEventEmitter.on('leaved', onWorkerLeaved);
+	requestersWatcherEventEmitter.on('camein', onRequesterComein);
 	requestersWatcherEventEmitter.on('goout', onRequesterGoout);
 }
 
 function handleNoAssignedTasks(){
-
 	return new Promise(function(resolve, reject){
 		checkIsCouldAssignTask()
 			.then(getTaskNames)
@@ -353,15 +352,66 @@ function workersWatcher(event){
 		// 	event.getType(),event.getName(),event.getPath(),event.toString());
 
 		getWorkers()
-			.then(checkIsAddedWorker)
-			.then(NotifyWorkerIsAdded)
+			.then(followChangedWorkers)
 			.catch(function(error){
 				console.error('%s=> workers changed, get/check/notify changing error: %s', config.masterName, error.message);
 			});
 	}
 }
 
-function checkIsAddedWorker(workerNames){
+function followChangedWorkers(workerNames){
+	return new Promise(function(resolve, reject){
+		var follows = [followCameinWorker, followLeavedWorker];
+		Promise.all(follows)
+			.then(function(){
+				resolve();
+			})
+			.catch(function(error){
+				console.error('%s=> workers changed, follow changed workers error: %s', config.masterName, error.message);
+			});
+	});
+}
+
+
+function followCameinWorker(workerNames){
+	return new Promise(function(resolve, reject){
+		checkHasCameinWorker(workerNames)
+			.then(NotifyWorkerCamein)
+			.then(function(){
+				resolve();
+			})
+			.catch(function(error){
+				if(error.message == 'NO_CAMEIN_WORKERS'){
+					console.log('%s=> workers changed, follow leaved workers, no leaved workers: %s', config.masterName);
+					resolve();
+				}else{
+					console.error('%s=> workers changed, follow came in workers error: %s', config.masterName, error.message);
+					reject(error);
+				}
+			});
+	});
+}
+
+function followLeavedWorker(workerNames){
+	return new Promise(function(resolve, reject){
+		checkHasLeavedWorker(workerNames)
+			.then(NotifyWorkerLeaved)
+			.then(function(){
+				resolve();
+			})
+			.catch(function(error){
+				if(error.message == 'NO_LEAVED_WORKERS'){
+					console.log('%s=> workers changed, follow leaved workers, no leaved workers: %s', config.masterName);
+					resolve();
+				}else{
+					console.error('%s=> workers changed, follow leaved workers error: %s', config.masterName, error.message);
+					reject(error);
+				}
+			});
+	});
+}
+
+function checkHasCameinWorker(workerNames){
 	return new Promise(function(resolve, reject){
 		var addedWorkers = [];
 		for(var i=0,workerName;workerName=workerNames[i++];){
@@ -375,19 +425,60 @@ function checkIsAddedWorker(workerNames){
 		if(addedWorkers.length > 0){
 			resolve(addedWorkers);
 		}else{
-			reject(new Error('NO_ADDED_WORKERS'));
+			reject(new Error('NO_CAMEIN_WORKERS'));
 		}
 	});
-
 }
 
-function NotifyWorkerIsAdded(addedWorkerNames){
+function NotifyWorkerCamein(cameinWorkerNames){
 	return new Promise(function(resolve, reject){
-		if(addedWorkerNames.length > 0){
-			workersWatcherEventEmitter.emit('comein', addedWorkerNames);
+		if(cameinWorkerNames.length > 0){
+			workersWatcherEventEmitter.emit('camein', cameinWorkerNames);
 			resolve();
 		}else{
-			reject(new Error('NO_ADDED_WORKERS'));
+			reject(new Error('NO_CAMEIN_WORKERS'));
+		}
+	});
+}
+
+function checkHasLeavedWorker(workerNames){
+	return new Promise(function(resolve, reject){
+		var leavedWorkers = [];
+		for(var memorizedWorkerPath in workers){
+			var memorizedWorkerPathIsExisted = false;
+			var memorizedWorkerPathElements = memorizedWorkerPath.split('/');
+			var memorizedWorkerName = memorizedWorkerPathElements[memorizedWorkerPathElements.length - 1];
+
+			for(var i=0,workerName;workerName=workerNames[i++];){
+				var workerPath = config.workersPath + '/' + workerName;
+				if(memorizedWorkerPath == workerPath){
+					memorizedWorkerPathIsExisted = true;
+					break;				
+				}	
+			}
+
+			if(!memorizedWorkerPathIsExisted){
+				delete workers[memorizedWorkerPath];
+				leavedWorkers.push(memorizedWorkerName);
+			}
+		}
+
+
+		if(leavedWorkers.length > 0){
+			resolve(leavedWorkers);
+		}else{
+			reject(new Error('NO_LEAVED_WORKERS'));
+		}
+	});
+}
+
+function NotifyWorkerLeaved(leavedWorkerNames){
+	return new Promise(function(resolve, reject){
+		if(leavedWorkerNames.length > 0){
+			workersWatcherEventEmitter.emit('leaved', leavedWorkerNames);
+			resolve();
+		}else{
+			reject(new Error('NO_LEAVED_WORKERS'));
 		}
 		
 	});
@@ -478,7 +569,7 @@ function checkIsAddedRequester(requesterNames){
 function NotifyRequestersIsAdded(addedRequesterNames){
 	return new Promise(function(resolve, reject){
 		if(addedRequesterNames.length > 0){
-			requestersWatcherEventEmitter.emit('comein', addedRequesterNames);
+			requestersWatcherEventEmitter.emit('camein', addedRequesterNames);
 			resolve();
 		}else{
 			reject(new Error('NO_ADDED_REQUESTERS'));
@@ -786,7 +877,7 @@ function removeTask(taskDetial){
 	});
 }
 
-function onWorkerComein(addedWorkerNames){
+function onWorkerCamein(addedWorkerNames){
 	console.log('%s=> workers <%s> came in', config.masterName, addedWorkerNames);
 	handleNoAssignedTasks()
 		.catch(function(error){
@@ -795,8 +886,19 @@ function onWorkerComein(addedWorkerNames){
 		});
 }
 
-function onWorkerGoout(){
-	
+function onWorkerLeaved(leavedWorkerNames){
+	console.log('%s=> workers <%s> leaved', config.masterName, leavedWorkerNames);
+
+	Promise.map(leavedWorkerNames, handleLeavedWorkerTasks)
+		.then(handleNoAssignedTasks)
+		.then(function(results){
+			console.log('%s=> reseted and reassigned tasks of leaved worker <%s> ok', 
+				config.masterName, JSON.stringify(leavedWorkerNames, null, 2));
+		})
+		.catch(function(error){
+			console.error('%s=> reseted and reassigned tasks of leaved worker error: %s', 
+				config.masterName, error.message);
+		});
 }
 
 function onRequesterComein(addedRequesterNames){
@@ -805,12 +907,142 @@ function onRequesterComein(addedRequesterNames){
 		.catch(function(error){
 			console.error('%s=> After requesters came in, handle no assigned tasks error: %s', 
 				config.masterName, error.message);
-		});	
+		});
 }
 
 function onRequesterGoout(){
 	
 }
+
+function handleLeavedWorkerTasks(leavedWorkerName, index){
+	return new Promise(function(resolve, reject){
+		getTaskPathsOfWorker(leavedWorkerName)
+			.then(handleLeavedWorkerNotDoneTasks)
+			.then(function(result){
+				console.log('%s=> reseted tasks of leaved worker <%s> ok', 
+					config.masterName, JSON.stringify(leavedWorkerNames, null, 2));
+				resolve();
+			})
+			.catch(function(error){
+				console.error('%s=> reseted tasks of leaved worker <%s> error: %s', 
+					config.masterName, leavedWorkerName, error.message);
+				resolve();
+			});
+	});
+}
+
+function handleLeavedWorkerNotDoneTasks(assignedTaskPaths, index){
+	return new Promise(function(resolve, reject){
+		Promise.map(assignedTaskPaths, handleLeavedWorkerNotDoneTask)
+			.then(function(result){
+				resolve();
+			})
+			.catch(function(error){
+				console.error('%s=> reseted not done tasks <%s> of leaved worker error: %s', 
+					config.masterName, JSON.strinify(assignedTaskPaths, null, 2), error.message);
+				resolve();
+			});
+	});
+}
+
+function handleLeavedWorkerNotDoneTask(assignedTaskPath, index){
+	return new Promise(function(resolve, reject){
+		checkAssignedTaskisNotDone(assignedTaskPath)
+			.then(getTaskDataByPath)
+			.then(resetAndReturnToTasks)
+			.then(function(result){
+				console.log('%s=> reseted not done task <%s> of leaved worker <%s>', 
+					config.masterName, result.taskNodeName, result.assignToWho);
+				resolve();
+			})
+			.catch(function(error){
+				console.error('%s=> reseted not done task <%s> of leaved worker error: %s', 
+					config.masterName, assignedTaskPath, error.message);
+				resolve();
+			});
+	});
+}
+ 
+function getTaskPathsOfWorker(workerName){
+	var assignedToWorkerPath = config.tasksAssignPath + '/' + workerName;
+
+	return new Promise(function(resolve, reject){
+		zkClient.getData(
+			assignedToWorkerPath,
+			function(error, children, state){
+				if(error){
+					// console.error(new Error('master::isResponsedTaskDone=>error: ' + error.message));
+					console.error('%s=> get task node names what is assigned to <%s> error: %s', 
+						config.masterName, workerName, error.message);
+					reject(error);
+					return;
+				}
+
+				for(var i in children){
+					children[i] = config.tasksAssignPath + '/' + workerName + '/' + children[i];
+				}
+
+				resolve(children);
+			});	
+	});
+}
+
+function checkAssignedTaskisNotDone(assignedTaskPath){
+	return new Promise(function(resolve, reject){
+		zkClient.getChildren(
+			assignedTaskPath,
+			function(error, children, state){
+				if(error){
+					// console.error(new Error('master::isTaskDone=>error: ' + error.message));
+					console.error('%s=> check the assigned task is not done error: %s', config.masterName, error.message);
+					reject(error);
+					return;
+				}
+
+				for(var i in children){
+					if(children[i] == 'done'){
+						reject(new Error('ASSIGNED_TASK_DONE'));
+						return;
+					}
+				}
+
+				resolve(assignedTaskPath);
+			});	
+	});
+}
+
+function resetAndReturnToTasks(taskDetail){
+	return new Promise(function(resolve, reject){
+		var assignedPath = taskDetail.assignedPath;
+		var assignToWho = taskDetail.assignToWho;
+
+		taskDetail.assignToWho = '';
+		taskDetail.assignedPath = '';
+
+		zkClient.transaction()       ++
+			.remove(
+				assignedPath + '/l' + 'done')
+			.remove(
+				assignedPath)
+			.setData(
+				taskDetail.taskPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)))
+			.commit(function(error, results){
+				if(error){
+					console.error('%s=> dispatched <%s> to <%s> error: %s', config.masterName, taskDetail.taskNodeName, workerName, error.message);
+					reject(error);
+					return;
+				}
+
+				taskDetail.assignToWho = assignToWho;
+				taskDetail.assignedPath = assignedPath;
+
+				resolve(taskDetail);
+			});
+	});
+}
+
+
 
 
 
