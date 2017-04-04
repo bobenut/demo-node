@@ -111,8 +111,8 @@ function doResponsiblity(){
 
 	workersWatcherEventEmitter.on('camein', onWorkerCamein);
 	workersWatcherEventEmitter.on('leaved', onWorkerLeaved);
-	requestersWatcherEventEmitter.on('camein', onRequesterComein);
-	requestersWatcherEventEmitter.on('goout', onRequesterGoout);
+	requestersWatcherEventEmitter.on('camein', onRequesterCamein);
+	requestersWatcherEventEmitter.on('goout', onRequesterLeaved);
 }
 
 function handleNoAssignedTasks(){
@@ -901,7 +901,7 @@ function onWorkerLeaved(leavedWorkerNames){
 		});
 }
 
-function onRequesterComein(addedRequesterNames){
+function onRequesterCamein(addedRequesterNames){
 	console.log('%s=> requesters <%s> came in', config.masterName, addedRequesterNames);
 	handleNoAssignedTasks()
 		.catch(function(error){
@@ -910,7 +910,7 @@ function onRequesterComein(addedRequesterNames){
 		});
 }
 
-function onRequesterGoout(){
+function onRequesterLeaved(){
 	
 }
 
