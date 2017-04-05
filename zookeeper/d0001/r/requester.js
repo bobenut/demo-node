@@ -88,7 +88,7 @@ function requesterWatcher(event){
 
 requester.submitTask = function(task){
 	zkClient.create(
-		config.tasksPath + '/' + 'task',
+		config.tasksDispatchingPath + '/' + 'task',
 		new Buffer(JSON.stringify(task,null,2) || ''),
 		zookeeper.CreateMode.PERSISTENT_SEQUENTIAL,
 		submitTaskCallback);

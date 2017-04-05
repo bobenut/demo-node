@@ -103,10 +103,11 @@ function doResponsiblity(){
 			resolve();
 		});
 	})
-	.then(SetTasksWatcher)
+	.then(setDispatchingTasksWatcher)
+	.then(setResponsingTasksWatcher)
 	.then(handleNoAssignedTasks)
 	.catch(function(error){
-		// console.log('master::doResponsiblity=>do synces error:' + error.message);
+		console.error('%s=> do responsiblity error: %s' , config.masterName, error.message);
 	});
 
 	workersWatcherEventEmitter.on('camein', onWorkerCamein);
@@ -117,6 +118,7 @@ function doResponsiblity(){
 
 function handleNoAssignedTasks(){
 	return new Promise(function(resolve, reject){
+
 		checkIsCouldAssignTask()
 			.then(getTaskNames)
 			.then(assignTasks)
@@ -153,8 +155,9 @@ function checkIsCouldAssignTask(){
 
 function getTaskNames(){
 	return new Promise(function(resolve, reject){
+
 		zkClient.getChildren(
-			config.tasksPath,
+			config.tasksDispatchingPath,
 			function(error, children, state){
 				if(error){
 					// console.log('master::getTaskNames=>error: %s', error.message);
@@ -171,8 +174,10 @@ function getTaskNames(){
 
 function assignTasks(taskNodeNames){
 	return new Promise(function(resolve1, reject1){
+
 		Promise.map(taskNodeNames, function(taskNodeName, index){
 			return new Promise(function(resolve2, reject2){
+
 				getTaskDataByName(taskNodeName)
 					.then(taskIsNotYetAssigned)
 					.then(assignTask)
@@ -198,11 +203,12 @@ function assignTasks(taskNodeNames){
 
 
 function getTaskDataByName(taskNodeName){
-	var taskPath = config.tasksPath + '/' + taskNodeName;
+	var taskDispatchingPath = config.tasksDispatchingPath + '/' + taskNodeName;
 
 	return new Promise(function(resolve, reject){
+
 		zkClient.getData(
-			taskPath,
+			taskDispatchingPath,
 			function(error, data, state){
 				if(error){
 					// consle.log('master::getTaskData=>get %s\'s data error: %s', taskName, error.message);
@@ -213,8 +219,9 @@ function getTaskDataByName(taskNodeName){
 
 				// console.log('master::getTaskData=>get %s\'s data ok, data: ', taskName, JSON.parse(data.toString())); 
 				var taskDetail = JSON.parse(data.toString());
-				taskDetail.taskNodeName = taskNodeName;
-				taskDetail.taskPath = taskPath;
+				taskDetail.taskNodeName = taskDetail.taskNodeName || taskNodeName;
+				taskDetail.taskDispatchingPath = taskDetail.taskDispatchingPath || taskDispatchingPath;
+				//console.log('####################################1: %s', JSON.stringify(taskDetail, null, 2));
 
 				resolve(taskDetail);			
 			});
@@ -233,10 +240,14 @@ function taskIsNotYetAssigned(taskDetail){
 
 function assignTask(taskDetail){
 	return new Promise(function(resolve, reject){
+		
+
 		if(!isExistWorkers){
 			reject(new Error('NO_WORKERS'));
 			return;
 		}
+
+		
 
 		var taskNo = takeOutTaskNo(taskDetail.taskNodeName);
 		var workerName = allocateWorkerForTask(taskNo);
@@ -244,13 +255,15 @@ function assignTask(taskDetail){
 		taskDetail.assignToWho = workerName;
 		taskDetail.assignedPath = config.tasksAssignPath + '/' + workerName + '/' + taskDetail.taskNodeName;
 
+		console.log('####################################3: %s', JSON.stringify(taskDetail, null, 2));
+
 		zkClient.transaction()
 			.create(
 				taskDetail.assignedPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)),
 				zookeeper.CreateMode.PERSISTENT)
 			.setData(
-				taskDetail.taskPath,
+				taskDetail.taskDispatchingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))
 			.commit(function(error, results){
 				if(error){
@@ -259,7 +272,7 @@ function assignTask(taskDetail){
 					reject(error);
 					return;
 				}
-
+				console.log('####################################4: %s');
 				// console.log('master::assignTask=>commit ok: %s', results); 
 				console.log('%s=> dispatched <%s> to <%s> ', config.masterName, taskDetail.taskNodeName, taskDetail.assignToWho);
 				resolve(taskDetail);
@@ -579,37 +592,71 @@ function NotifyRequestersIsAdded(addedRequesterNames){
 
 }
 
-function SetTasksWatcher(event){
+function setDispatchingTasksWatcher(event){
 	return new Promise(function(resolve, reject){
 		zkClient.getChildren(
-			config.tasksPath,
-			tasksWatcher,
+			config.tasksDispatchingPath,
+			dispatchingTasksWatcher,
 			function(error, children, state){
 				if(error){
-					// console.log('master::SetTasksWatcher=>set tasks watcher error: %s', error.message);
+					// console.log('master::setDispatchingTasksWatcher=>set tasks watcher error: %s', error.message);
 					console.error('%s=> set watcher for tasks error: %s', config.masterName, error.message);
 					reject(error);
 					return;
 				}
 
-				// console.log('master::SetTasksWatcher=>set tasks watcher ok: %s', children);
+				// console.log('master::setDispatchingTasksWatcher=>set tasks watcher ok: %s', children);
 				resolve();			
 			});
 	});
 }
 
-function tasksWatcher(event){
+function dispatchingTasksWatcher(event){
 	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
-		// console.log('master::tasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
+		// console.log('master::dispatchingTasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
 		// 	event.getType(),event.getName(),event.getPath(),event.toString());
-		SetTasksWatcher()
+		setDispatchingTasksWatcher()
 			.then(handleNoAssignedTasks)
 			.then(function(results){
-				// console.log('master::tasksWatcher=>reset tasks watcher ok');
+				// console.log('master::dispatchingTasksWatcher=>reset tasks watcher ok');
 			})
 			.catch(function(error){
-				// console.log('master::tasksWatcher=>reset tasks watcher error: %s', error.message);
+				// console.log('master::dispatchingTasksWatcher=>reset tasks watcher error: %s', error.message);
 			})
+	}
+}
+
+function setResponsingTasksWatcher(event){
+	return new Promise(function(resolve, reject){
+		zkClient.getChildren(
+			config.tasksResponsingPath,
+			responsingTasksWatcher,
+			function(error, children, state){
+				if(error){
+					// console.log('master::setDispatchingTasksWatcher=>set tasks watcher error: %s', error.message);
+					console.error('%s=> set watcher for dispatching tasks error: %s', config.masterName, error.message);
+					reject(error);
+					return;
+				}
+
+				// console.log('master::setDispatchingTasksWatcher=>set tasks watcher ok: %s', children);
+				resolve();			
+			});
+	});
+}
+
+function responsingTasksWatcher(event){
+	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
+		// console.log('master::dispatchingTasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
+		// 	event.getType(),event.getName(),event.getPath(),event.toString());
+		setResponsingTasksWatcher()
+			.then(handleResponsingTasks)
+			.then(function(results){
+				// console.log('master::dispatchingTasksWatcher=>reset tasks watcher ok');
+			})
+			.catch(function(error){
+				// console.log('master::dispatchingTasksWatcher=>reset tasks watcher error: %s', error.message);
+			});
 	}
 }
 
@@ -632,27 +679,24 @@ function setAssignedTasksWatcher(taskDetail){
 				resolve();			
 			});
 	});
-		
 }
 
 function assignedTasksWatcher(event){
 	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
 		// console.log('master::assignedTasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
 		// 	event.getType(),event.getName(),event.getPath(),event.toString());
-
-		reponseDoneTask(event.getPath())
+		takeDoneTaskToResponsing(event.getPath())
 			.catch(function(error){
 
 			});
 	}
 }
 
-function reponseDoneTask(assignedTaskPath){
+function takeDoneTaskToResponsing(assignedTaskPath){
 	return new Promise(function(resolve, reject){
 		isTaskDone(assignedTaskPath)
 			.then(getAssignedTaskData)
-			.then(taskDoneTaskIntoRequester)
-			.then(getResponsedTaskDone)
+			.then(taskDoneTaskToResponsing)
 			.then(function(){
 				resolve();
 			})
@@ -660,6 +704,109 @@ function reponseDoneTask(assignedTaskPath){
 				// console.error(new Error('master::reponseDoneTask=>error: ' + error.message));
 				reject(error);
 			});
+	});
+}
+
+function taskDoneTaskToResponsing(taskDetail){
+	var taskNodeNo = takeOutTaskNo(taskDetail.taskNodeName);
+	var requesterName = allocateRequesterForTask(taskNodeNo);
+
+	taskDetail.taskResponsingPath = config.tasksResponsingPath + '/' + taskDetail.taskNodeName;
+
+	return new Promise(function(resolve, reject){
+		zkClient.transaction()
+			.create(
+				taskDetail.taskResponsingPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)),
+				zookeeper.CreateMode.PERSISTENT)
+			.setData(
+				taskDetail.tasksDispatchingPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)))
+			.setData(
+				taskDetail.assignedPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)))			
+			.commit(function(error, results){
+				if(error){
+					console.error('%s=> took <%s> to responsing error: %s', 
+						config.masterName, taskDetail.taskNodeName, error.message);
+					reject(error);
+					return;
+				}
+
+				console.log('%s=> took <%s> done to responsing', 
+					config.masterName, taskDetail.taskNodeName);
+				resolve(taskDetail);
+			});		
+	});
+}
+
+function handleResponsingTasks(){
+	return new Promise(function(resolve, reject){
+		checkIsCouldAssignTask()
+			.then(getResponsingTaskNodeNames)
+			.then(responseTasksToRequester)
+			.then(function(results){
+				// console.log('master::handleNoAssignedTasks=>assign tasks ok');
+				resolve(results);
+			})
+		.catch(function(error){
+			// console.log('master::handleNoAssignedTasks=>assign tasks error: %s', error.message);
+			console.error('%s=> handle no assigned tasks error %s', config.masterName, error.message);
+			reject(error);		
+		});
+	});
+}
+
+function getResponsingTaskNodeNames(){
+	return new Promise(function(resolve, reject){
+		zkClient.getChildren(
+			config.tasksResponsingPath,
+			function(error, children, state){
+				if(error){
+					// console.log('master::getTaskNames=>error: %s', error.message);
+					console.error('%s=> get names all of tasks error: %s', config.masterName, error.message);
+					reject(error);
+					return;
+				}
+
+				// console.log('master::getTaskNames=>ok: %s', children);
+				resolve(children);			
+			});
+	});
+}
+
+function responseTasksToRequester(taskNodeNames){
+	return new Promise(function(resolve, reject){
+		Promise.map(taskNodeNames, responseTaskToRequester)
+			.then(function(results){
+					resolve(results)
+				}, function(error){
+					reject(error);
+				});
+	});
+}
+
+function responseTaskToRequester(taskNodeName, index){
+	return new Promise(function(resolve, reject){
+		getTaskDataByName(taskNodeName)
+			.then(taskIsNotYetResponsed)
+			.then(taskResponsingTaskToRequester)
+			.then(getResponsedTaskDone)
+			.then(function(results){
+				resolve(results);
+			}).catch(function(error){
+				resolve();
+			});
+		});
+}
+
+function taskIsNotYetResponsed(taskDetail){
+	return new Promise(function(resolve, reject){
+		if(taskDetail.responseToWho.length === 0){
+			resolve(taskDetail);
+		}else{
+			reject(new Error('TASK_RESPONSED'));
+		}
 	});
 }
 
@@ -706,7 +853,7 @@ function getAssignedTaskData(assignedTaskPath){
 	});
 }
 
-function taskDoneTaskIntoRequester(taskDetail){
+function taskResponsingTaskToRequester(taskDetail){
 	var taskNodeNo = takeOutTaskNo(taskDetail.taskNodeName);
 	var requesterName = allocateRequesterForTask(taskNodeNo);
 
@@ -721,11 +868,14 @@ function taskDoneTaskIntoRequester(taskDetail){
 				new Buffer(JSON.stringify(taskDetail, null, 2)),
 				zookeeper.CreateMode.PERSISTENT)
 			.setData(
-				taskDetail.taskPath,
+				taskDetail.tasksDispatchingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))
 			.setData(
-				taskDetail.assignedPath,
+				taskDetail.tasksResponsingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))			
+			.setData(
+				taskDetail.assignedPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)))	
 			.commit(function(error, results){
 				if(error){
 					// console.log('master::taskDoneTaskIntoRequester=>commit error: %s', error.message); 
@@ -758,7 +908,6 @@ function getResponsedTaskDone(taskDetail){
 			responsedTaskWatcher,
 			function(error, children, state){
 				if(error){
-					// console.log('master::SetResponsedTaskWatcher=>set responsed task watcher error: %s', error.message);
 					console.error('%s=> get task watcher is done that was responsed to requester error: %s', 
 						config.masterName, error.message);
 					reject(error);
@@ -768,14 +917,12 @@ function getResponsedTaskDone(taskDetail){
 
 				for(var i in children){
 					if(children[i] == 'done'){
-						console.log('#################have done');
 						handleResponsedTask(taskDetail.responseTaskPath);
 						reject(new Error('REPONSED_TASK_IS_DONE'));
 						return;
 					}
 				}
 
-				// console.log('master::SetResponsedTaskWatcher=>set responsed task watcher ok');
 				resolve(taskDetail);			
 			});
 	});
@@ -860,7 +1007,9 @@ function removeTask(taskDetial){
 			.remove(
 				taskDetial.assignedPath)		
 			.remove(
-				taskDetial.taskPath)			
+				taskDetial.taskResponsingPath)						
+			.remove(
+				taskDetial.tasksDispatchingPath)			
 			.commit(function(error, results){
 				if(error){
 					// console.log('master::removeTask=>remove all infos of task  error: %s', error.message); 
@@ -1019,7 +1168,7 @@ function resetAndReturnToTasks(taskDetail){
 		taskDetail.assignToWho = '';
 		taskDetail.assignedPath = '';
 
-		zkClient.transaction()       ++
+		zkClient.transaction()
 			.remove(
 				assignedPath + '/l' + 'done')
 			.remove(

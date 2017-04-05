@@ -5,7 +5,8 @@ module.exports = {
 	masterLockPath: '/zht/status-collaboration/master/lock',
 	workersPath: '/zht/status-collaboration/workers',
 	requestersPath: '/zht/status-collaboration/requesters',
-	tasksPath: '/zht/status-collaboration/tasks',
+	tasksDispatchingPath: '/zht/status-collaboration/tasks/dispatching',
+	tasksResponsingPath: '/zht/status-collaboration/tasks/responsing',
 	tasksAssignPath: '/zht/status-collaboration/assign',
 	tasksResponsePath: '/zht/status-collaboration/response'
 }
