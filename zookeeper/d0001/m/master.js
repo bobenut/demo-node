@@ -19,10 +19,10 @@ var workersWatcherEventEmitter = new EventEmitter();
 
 master.begin = function(){
 	// zkClient = zookeeper.createClient('172.13.2.204:2181', {sessionTimeout:5000});
-	// zkClient = zookeeper.createClient('172.16.16.210:2181', {sessionTimeout:5000});
+	zkClient = zookeeper.createClient('172.16.16.210:2181', {sessionTimeout:5000});
 	// zkClient = zookeeper.createClient('172.16.24.208:2181', {sessionTimeout:5000});
 	// zkClient = zookeeper.createClient('172.16.24.166:2181', {sessionTimeout:5000});
-	zkClient = zookeeper.createClient('172.16.23.227:2181', {sessionTimeout:5000});
+	// zkClient = zookeeper.createClient('172.16.23.227:2181', {sessionTimeout:5000});
 
 	zkClient.on('state', onZkClientState);
 
@@ -247,15 +247,11 @@ function assignTask(taskDetail){
 			return;
 		}
 
-		
-
 		var taskNo = takeOutTaskNo(taskDetail.taskNodeName);
 		var workerName = allocateWorkerForTask(taskNo);
 
 		taskDetail.assignToWho = workerName;
 		taskDetail.assignedPath = config.tasksAssignPath + '/' + workerName + '/' + taskDetail.taskNodeName;
-
-		console.log('####################################3: %s', JSON.stringify(taskDetail, null, 2));
 
 		zkClient.transaction()
 			.create(
@@ -272,7 +268,6 @@ function assignTask(taskDetail){
 					reject(error);
 					return;
 				}
-				console.log('####################################4: %s');
 				// console.log('master::assignTask=>commit ok: %s', results); 
 				console.log('%s=> dispatched <%s> to <%s> ', config.masterName, taskDetail.taskNodeName, taskDetail.assignToWho);
 				resolve(taskDetail);
@@ -354,7 +349,7 @@ function getWorkers(){
 					return;
 				}
 				console.log('%s=> got workers', config.masterName);
-				resolve(children);
+				resolve(children||[]);
 			});
 	});
 }
@@ -364,6 +359,7 @@ function workersWatcher(event){
 		// console.log('master::workersWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
 		// 	event.getType(),event.getName(),event.getPath(),event.toString());
 
+		console.log('%s=> workers changed', config.masterName);
 		getWorkers()
 			.then(followChangedWorkers)
 			.catch(function(error){
@@ -374,7 +370,7 @@ function workersWatcher(event){
 
 function followChangedWorkers(workerNames){
 	return new Promise(function(resolve, reject){
-		var follows = [followCameinWorker, followLeavedWorker];
+		var follows = [followCameinWorker(workerNames), followLeavedWorker(workerNames)];
 		Promise.all(follows)
 			.then(function(){
 				resolve();
@@ -385,8 +381,9 @@ function followChangedWorkers(workerNames){
 	});
 }
 
-
 function followCameinWorker(workerNames){
+		// console.log('$$$$10: %s', JSON.stringify(workerNames, null, 2));
+
 	return new Promise(function(resolve, reject){
 		checkHasCameinWorker(workerNames)
 			.then(NotifyWorkerCamein)
@@ -395,10 +392,10 @@ function followCameinWorker(workerNames){
 			})
 			.catch(function(error){
 				if(error.message == 'NO_CAMEIN_WORKERS'){
-					console.log('%s=> workers changed, follow leaved workers, no leaved workers: %s', config.masterName);
+					console.log('%s=> workers changed, follow workers came in, no workers came in', config.masterName);
 					resolve();
 				}else{
-					console.error('%s=> workers changed, follow came in workers error: %s', config.masterName, error.message);
+					console.error('%s=> workers changed, follow workers came in error: %s', config.masterName, error.message);
 					reject(error);
 				}
 			});
@@ -414,7 +411,7 @@ function followLeavedWorker(workerNames){
 			})
 			.catch(function(error){
 				if(error.message == 'NO_LEAVED_WORKERS'){
-					console.log('%s=> workers changed, follow leaved workers, no leaved workers: %s', config.masterName);
+					console.log('%s=> workers changed, follow leaved workers, no workers leaved' , config.masterName);
 					resolve();
 				}else{
 					console.error('%s=> workers changed, follow leaved workers error: %s', config.masterName, error.message);
@@ -427,8 +424,11 @@ function followLeavedWorker(workerNames){
 function checkHasCameinWorker(workerNames){
 	return new Promise(function(resolve, reject){
 		var addedWorkers = [];
-		for(var i=0,workerName;workerName=workerNames[i++];){
+
+		for(var i=0, workerName; i<workerNames.length; i++){
+			var workerPathIsExisted = false;
 			var workerPath = config.workersPath + '/' + workerName;
+
 			if(!workers[workerPath]){
 				workers[workerPath] = {}
 				addedWorkers.push(workerName);
@@ -439,7 +439,7 @@ function checkHasCameinWorker(workerNames){
 			resolve(addedWorkers);
 		}else{
 			reject(new Error('NO_CAMEIN_WORKERS'));
-		}
+		}			
 	});
 }
 
@@ -457,6 +457,7 @@ function NotifyWorkerCamein(cameinWorkerNames){
 function checkHasLeavedWorker(workerNames){
 	return new Promise(function(resolve, reject){
 		var leavedWorkers = [];
+		// console.log('$$$$10: %s', JSON.stringify(workers, null, 2));
 		for(var memorizedWorkerPath in workers){
 			var memorizedWorkerPathIsExisted = false;
 			var memorizedWorkerPathElements = memorizedWorkerPath.split('/');
@@ -478,8 +479,10 @@ function checkHasLeavedWorker(workerNames){
 
 
 		if(leavedWorkers.length > 0){
+			// console.log('&&1-1');
 			resolve(leavedWorkers);
 		}else{
+			// console.log('&&1-2');
 			reject(new Error('NO_LEAVED_WORKERS'));
 		}
 	});
@@ -488,9 +491,11 @@ function checkHasLeavedWorker(workerNames){
 function NotifyWorkerLeaved(leavedWorkerNames){
 	return new Promise(function(resolve, reject){
 		if(leavedWorkerNames.length > 0){
+			// console.log('&&2-1');
 			workersWatcherEventEmitter.emit('leaved', leavedWorkerNames);
 			resolve();
 		}else{
+			// console.log('&&2-2');
 			reject(new Error('NO_LEAVED_WORKERS'));
 		}
 		
@@ -508,6 +513,13 @@ function syncRequesters(){
 			.catch(function(error){
 				console.error('%s=> got requesters error: %s', config.masterName, error.message);
 				reject(error);
+			});	var follows = [followCameinWorker, followLeavedWorker];
+		Promise.all(follows)
+			.then(function(){
+				resolve();
+			})
+			.catch(function(error){
+				console.error('%s=> workers changed, follow changed workers error: %s', config.masterName, error.message);
 			});
 	});
 }
@@ -638,7 +650,6 @@ function setResponsingTasksWatcher(event){
 					reject(error);
 					return;
 				}
-
 				// console.log('master::setDispatchingTasksWatcher=>set tasks watcher ok: %s', children);
 				resolve();			
 			});
@@ -647,7 +658,7 @@ function setResponsingTasksWatcher(event){
 
 function responsingTasksWatcher(event){
 	if(event.getType() === zookeeper.Event.NODE_CHILDREN_CHANGED){
-		// console.log('master::dispatchingTasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
+		// console.log('master::responsingTasksWatcher=>type=%s, name=%s, path=%s, eventString=%s', 
 		// 	event.getType(),event.getName(),event.getPath(),event.toString());
 		setResponsingTasksWatcher()
 			.then(handleResponsingTasks)
@@ -662,7 +673,7 @@ function responsingTasksWatcher(event){
 
 function setAssignedTasksWatcher(taskDetail){
 	var workerAssignPath = config.tasksAssignPath + '/' + taskDetail.assignToWho + '/' + taskDetail.taskNodeName;
-		// console.log('master::assignTask=>workerAssignPath: %s', workerAssignPath); 
+	// console.log('master::assignTask=>workerAssignPath: %s', workerAssignPath); 
 	return new Promise(function(resolve, reject){
 		zkClient.getChildren(
 			workerAssignPath,
@@ -712,6 +723,8 @@ function taskDoneTaskToResponsing(taskDetail){
 	var requesterName = allocateRequesterForTask(taskNodeNo);
 
 	taskDetail.taskResponsingPath = config.tasksResponsingPath + '/' + taskDetail.taskNodeName;
+	// console.log('####3');
+	// console.log('tasksResponsingPath=%s, taskResponsingPath=%s', taskDetail.taskResponsingPath, taskDetail.taskDispatchingPath);
 
 	return new Promise(function(resolve, reject){
 		zkClient.transaction()
@@ -720,7 +733,7 @@ function taskDoneTaskToResponsing(taskDetail){
 				new Buffer(JSON.stringify(taskDetail, null, 2)),
 				zookeeper.CreateMode.PERSISTENT)
 			.setData(
-				taskDetail.tasksDispatchingPath,
+				taskDetail.taskDispatchingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))
 			.setData(
 				taskDetail.assignedPath,
@@ -749,11 +762,11 @@ function handleResponsingTasks(){
 				// console.log('master::handleNoAssignedTasks=>assign tasks ok');
 				resolve(results);
 			})
-		.catch(function(error){
-			// console.log('master::handleNoAssignedTasks=>assign tasks error: %s', error.message);
-			console.error('%s=> handle no assigned tasks error %s', config.masterName, error.message);
-			reject(error);		
-		});
+			.catch(function(error){
+				// console.log('master::handleNoAssignedTasks=>assign tasks error: %s', error.message);
+				console.error('%s=> responsing tasks error: %s', config.masterName, error.message);
+				reject(error);		
+			});
 	});
 }
 
@@ -768,7 +781,6 @@ function getResponsingTaskNodeNames(){
 					reject(error);
 					return;
 				}
-
 				// console.log('master::getTaskNames=>ok: %s', children);
 				resolve(children);			
 			});
@@ -847,7 +859,6 @@ function getAssignedTaskData(assignedTaskPath){
 				}
 
 				// console.log('master::getAssignedTaskData=>get data ok, data: ', JSON.parse(data.toString())); 
-
 				resolve(JSON.parse(data.toString()));			
 			});
 	});
@@ -868,10 +879,10 @@ function taskResponsingTaskToRequester(taskDetail){
 				new Buffer(JSON.stringify(taskDetail, null, 2)),
 				zookeeper.CreateMode.PERSISTENT)
 			.setData(
-				taskDetail.tasksDispatchingPath,
+				taskDetail.taskDispatchingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))
 			.setData(
-				taskDetail.tasksResponsingPath,
+				taskDetail.taskResponsingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))			
 			.setData(
 				taskDetail.assignedPath,
@@ -1009,7 +1020,7 @@ function removeTask(taskDetial){
 			.remove(
 				taskDetial.taskResponsingPath)						
 			.remove(
-				taskDetial.tasksDispatchingPath)			
+				taskDetial.taskDispatchingPath)			
 			.commit(function(error, results){
 				if(error){
 					// console.log('master::removeTask=>remove all infos of task  error: %s', error.message); 

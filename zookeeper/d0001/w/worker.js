@@ -15,10 +15,10 @@ var worker = {};
 
 worker.begin = function(){
 	// zkClient = zookeeper.createClient('172.13.2.204:2181', {sessionTimeout:5000});
-	// zkClient = zookeeper.createClient('172.16.16.210:2181', {sessionTimeout:5000});
+	zkClient = zookeeper.createClient('172.16.16.210:2181', {sessionTimeout:5000});
 	// zkClient = zookeeper.createClient('172.16.24.208:2181', {sessionTimeout:5000});
 	// zkClient = zookeeper.createClient('172.16.24.166:2181', {sessionTimeout:5000});
-	zkClient = zookeeper.createClient('172.16.23.227:2181', {sessionTimeout:5000});
+	// zkClient = zookeeper.createClient('172.16.23.227:2181', {sessionTimeout:5000});
 
 
 	zkClient.on('state', onZkClientState);
