@@ -424,8 +424,8 @@ function followLeavedWorker(workerNames){
 function checkHasCameinWorker(workerNames){
 	return new Promise(function(resolve, reject){
 		var addedWorkers = [];
-
-		for(var i=0, workerName; i<workerNames.length; i++){
+		for(var i=0; i<workerNames.length; i++){
+			var workerName = workerNames[i];
 			var workerPathIsExisted = false;
 			var workerPath = config.workersPath + '/' + workerName;
 
@@ -1079,12 +1079,12 @@ function handleLeavedWorkerTasks(leavedWorkerName, index){
 		getTaskPathsOfWorker(leavedWorkerName)
 			.then(handleLeavedWorkerNotDoneTasks)
 			.then(function(result){
-				console.log('%s=> reseted tasks of leaved <%s> ok', 
-					config.masterName, leavedWorkerName, null, 2);
+				console.log('%s=> reseted tasks of <%s> leaved ok', 
+					config.masterName, leavedWorkerName);
 				resolve();
 			})
 			.catch(function(error){
-				console.error('%s=> reseted tasks of leaved worker <%s> error: %s', 
+				console.error('%s=> reseted tasks of worker leaved <%s> error: %s', 
 					config.masterName, leavedWorkerName, error.message);
 				resolve();
 			});
@@ -1151,7 +1151,6 @@ function getTaskPathsOfWorker(workerName){
 
 function checkAssignedTaskisNotDone(assignedTaskPath){
 	return new Promise(function(resolve, reject){
-		console.log('111');
 		zkClient.getChildren(
 			assignedTaskPath,
 			function(error, children, state){
@@ -1181,7 +1180,6 @@ function resetAndReturnToTasks(taskDetail){
 
 		taskDetail.assignToWho = '';
 		taskDetail.assignedPath = '';
-		console.log('222');
 
 		zkClient.transaction()
 			.remove(
