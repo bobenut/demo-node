@@ -129,6 +129,7 @@ function getAllAssignedTaskNames(){
 	return new Promise(function(resolve, reject){
 		zkClient.getChildren(
 			config.tasksAssignPath + '/' + config.workerName,
+			tasksWatcher,
 			function(error, children, state){
 				if(error){
 					// console.log('%s::getAllAssignedTaskNames.callback=>error: %s', workerName, error.message);
@@ -253,8 +254,6 @@ function tasksWatcher(event){
 			.finally(SetTasksWatcher);
 	}
 }
-
-
 
 function createTaskJobBase(){
 	return {
