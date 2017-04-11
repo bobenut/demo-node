@@ -1079,8 +1079,8 @@ function handleLeavedWorkerTasks(leavedWorkerName, index){
 		getTaskPathsOfWorker(leavedWorkerName)
 			.then(handleLeavedWorkerNotDoneTasks)
 			.then(function(result){
-				console.log('%s=> reseted tasks of leaved worker <%s> ok', 
-					config.masterName, JSON.stringify(leavedWorkerNames, null, 2));
+				console.log('%s=> reseted tasks of leaved <%s> ok', 
+					config.masterName, leavedWorkerName, null, 2);
 				resolve();
 			})
 			.catch(function(error){
@@ -1093,6 +1093,7 @@ function handleLeavedWorkerTasks(leavedWorkerName, index){
 
 function handleLeavedWorkerNotDoneTasks(assignedTaskPaths, index){
 	return new Promise(function(resolve, reject){
+		// console.log('1111: %s', JSON.stringify(assignedTaskPaths, null, 2));
 		Promise.map(assignedTaskPaths, handleLeavedWorkerNotDoneTask)
 			.then(function(result){
 				resolve();
@@ -1107,6 +1108,7 @@ function handleLeavedWorkerNotDoneTasks(assignedTaskPaths, index){
 
 function handleLeavedWorkerNotDoneTask(assignedTaskPath, index){
 	return new Promise(function(resolve, reject){
+		// console.log('222');
 		checkAssignedTaskisNotDone(assignedTaskPath)
 			.then(getTaskDataByPath)
 			.then(resetAndReturnToTasks)
@@ -1127,7 +1129,7 @@ function getTaskPathsOfWorker(workerName){
 	var assignedToWorkerPath = config.tasksAssignPath + '/' + workerName;
 
 	return new Promise(function(resolve, reject){
-		zkClient.getData(
+		zkClient.getChildren(
 			assignedToWorkerPath,
 			function(error, children, state){
 				if(error){
@@ -1142,13 +1144,14 @@ function getTaskPathsOfWorker(workerName){
 					children[i] = config.tasksAssignPath + '/' + workerName + '/' + children[i];
 				}
 
-				resolve(children);
+				resolve(children || []);
 			});	
 	});
 }
 
 function checkAssignedTaskisNotDone(assignedTaskPath){
 	return new Promise(function(resolve, reject){
+		console.log('111');
 		zkClient.getChildren(
 			assignedTaskPath,
 			function(error, children, state){
@@ -1178,18 +1181,18 @@ function resetAndReturnToTasks(taskDetail){
 
 		taskDetail.assignToWho = '';
 		taskDetail.assignedPath = '';
+		console.log('222');
 
 		zkClient.transaction()
 			.remove(
-				assignedPath + '/l' + 'done')
-			.remove(
 				assignedPath)
 			.setData(
-				taskDetail.taskPath,
+				taskDetail.taskDispatchingPath,
 				new Buffer(JSON.stringify(taskDetail, null, 2)))
 			.commit(function(error, results){
 				if(error){
-					console.error('%s=> dispatched <%s> to <%s> error: %s', config.masterName, taskDetail.taskNodeName, workerName, error.message);
+					console.error('%s=> return <%s> to tasks error: %s', 
+						config.masterName, taskDetail.taskNodeName, error.message);
 					reject(error);
 					return;
 				}
