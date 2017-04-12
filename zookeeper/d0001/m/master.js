@@ -7,6 +7,7 @@ const config = require('./config');
 var zkClient;
 var sessionId;
 var workers = {};
+var workersTable = [];
 var requesters = {};
 var assignedTasks = {};
 
@@ -303,7 +304,17 @@ function takeOutTaskNo(taskNodeName){
 }
 
 function allocateWorkerForTask(taskNo){
-	return 'worker' + (taskNo % Object.getOwnPropertyNames(workers).length + 1);
+	
+
+	var allocatedWorkerIndex = taskNo % workersTable.length ;
+	var allocatedWorkerPath = workersTable[allocatedWorkerIndex];
+	var allocatedWorkerPathElements = allocatedWorkerPath.split('/');
+	var allocatedWorkerName = allocatedWorkerPathElements[allocatedWorkerPathElements.length - 1];
+
+	// console.log("%%%%=> allocateWorkerForTask=> allocatedWorkerName=%s", allocatedWorkerName);
+	// console.log("%%%%=> allocateWorkerForTask=> workers=%s", JSON.stringify(workers, null, 2));
+	// console.log("%%%%=> allocateWorkerForTask=> workersTable=%s", JSON.stringify(workersTable, null, 2));
+	return allocatedWorkerName;
 }
 
 function isExistWorkers(){
@@ -329,7 +340,12 @@ function memoryPersistWorkers(workerNames){
 		for(var i=0,workerName;workerName=workerNames[i++];){
 			var workerPath = config.workersPath + '/' + workerName;
 			if(!workers[workerPath]){
-				workers[workerPath] = {};
+				workersTable.push(workerPath);
+				workers[workerPath] = {
+					tableIndex: workersTable.length - 1
+				};
+				// console.log("%%%%=> memoryPersistWorkers=> workers=%s", JSON.stringify(workers, null, 2));
+				// console.log("%%%%=> memoryPersistWorkers=> workersTable=%s", JSON.stringify(workersTable, null, 2));
 				// console.log('master::memoryPersistWorkers=>add worker: %s', workerPath);
 			}
 		}
@@ -430,7 +446,11 @@ function checkHasCameinWorker(workerNames){
 			var workerPath = config.workersPath + '/' + workerName;
 
 			if(!workers[workerPath]){
-				workers[workerPath] = {}
+				workersTable.push(workerPath);
+				workers[workerPath] = {
+					tableIndex: workersTable.length - 1
+				};
+
 				addedWorkers.push(workerName);
 			}
 		}
@@ -472,7 +492,13 @@ function checkHasLeavedWorker(workerNames){
 			}
 
 			if(!memorizedWorkerPathIsExisted){
+				workersTable.splice(workers[memorizedWorkerPath].tableIndex, 1); 
 				delete workers[memorizedWorkerPath];
+				for(var i=0; i < workersTable.length; i++){
+					// console.log("@@@@=> %s", JSON.stringify(workers[workersTable[i]], null, 2));
+					workers[workersTable[i]].tableIndex = i;
+				}
+
 				leavedWorkers.push(memorizedWorkerName);
 			}
 		}
@@ -480,6 +506,8 @@ function checkHasLeavedWorker(workerNames){
 
 		if(leavedWorkers.length > 0){
 			// console.log('&&1-1');
+			// console.log("%%%%=> checkHasLeavedWorker=> workers=%s", JSON.stringify(workers, null, 2));
+			// console.log("%%%%=> checkHasLeavedWorker=> workersTable=%s", JSON.stringify(workersTable, null, 2));
 			resolve(leavedWorkers);
 		}else{
 			// console.log('&&1-2');
