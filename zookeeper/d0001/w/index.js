@@ -1,2 +1,0 @@
-var zk = require('zookeeper');
-
