@@ -19,10 +19,10 @@ router.post('/task/overtime', function(req, res, next){
 		isWorkerDone:false,
 		isResponsing:false,
 		isResponsedToRquester:false,
-		isRquesterDone:false,
+		isRequesterDone:false,
 		assignToWho:'',
 		responseToWho:'',
-		taskDispatchingPath:''
+		taskDispatchingPath:'',
 		assignedPath:'',
 		taskResponsingPath:'',
 		responseTaskPath:''
