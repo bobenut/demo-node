@@ -251,6 +251,7 @@ function assignTask(taskDetail){
 		var taskNo = takeOutTaskNo(taskDetail.taskNodeName);
 		var workerName = allocateWorkerForTask(taskNo);
 
+		taskDetail.isDispatchedToWorker = true;
 		taskDetail.assignToWho = workerName;
 		taskDetail.assignedPath = config.tasksAssignPath + '/' + workerName + '/' + taskDetail.taskNodeName;
 
@@ -701,7 +702,7 @@ function responsingTasksWatcher(event){
 
 function setAssignedTasksWatcher(taskDetail){
 	var workerAssignPath = config.tasksAssignPath + '/' + taskDetail.assignToWho + '/' + taskDetail.taskNodeName;
-	// console.log('master::assignTask=>workerAssignPath: %s', workerAssignPath); 
+	// console.log('master::assignTask=>workerAssignPath: %s', workerAssignPath);
 	return new Promise(function(resolve, reject){
 		zkClient.getChildren(
 			workerAssignPath,
@@ -750,6 +751,7 @@ function taskDoneTaskToResponsing(taskDetail){
 	var taskNodeNo = takeOutTaskNo(taskDetail.taskNodeName);
 	var requesterName = allocateRequesterForTask(taskNodeNo);
 
+	taskDetail.isResponsing = true;
 	taskDetail.taskResponsingPath = config.tasksResponsingPath + '/' + taskDetail.taskNodeName;
 	// console.log('####3');
 	// console.log('tasksResponsingPath=%s, taskResponsingPath=%s', taskDetail.taskResponsingPath, taskDetail.taskDispatchingPath);
@@ -896,6 +898,7 @@ function taskResponsingTaskToRequester(taskDetail){
 	var taskNodeNo = takeOutTaskNo(taskDetail.taskNodeName);
 	var requesterName = allocateRequesterForTask(taskNodeNo);
 
+	taskDetail.isResponsedToRquester = true;
 	taskDetail.responseToWho = requesterName;
 	taskDetail.responseTaskPath = config.tasksResponsePath + '/' + requesterName + '/' + taskDetail.taskNodeName;
 	// console.log('master::taskDoneTaskIntoRequester=>responseTaskPath: %s', taskDetail.responseTaskPath ); 
@@ -990,6 +993,7 @@ function SetResponsedTaskWatcher(taskDetail){
 function handleResponsedTask(responseTaskPath){
 		getTaskDataByPath(responseTaskPath)
 			.then(isResponsedTaskDone)
+			.then(updateResponsedTaskIsDone)
 			.then(removeTask)
 			.catch(function(error){
 				// console.log('master::responsedTaskWatcher=>error: %s', error.message); 
@@ -1031,6 +1035,39 @@ function isResponsedTaskDone(taskDetail){
 			});	
 	});
 }
+
+function updateResponsedTaskIsDone(taskDetial){
+	return new Promise(function(resolve, reject){
+		taskDetail.isRquesterDone = true;
+		zkClient.transaction()
+			.setData(
+				taskDetail.responseTaskPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)),
+			.setData(
+				taskDetail.taskResponsingPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)),
+				zookeeper.CreateMode.PERSISTENT)
+			.setData(
+				taskDetail.assignedPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)))
+			.setData(
+				taskDetail.taskDispatchingPath,
+				new Buffer(JSON.stringify(taskDetail, null, 2)))
+			.commit(function(error, results){
+				if(error){
+					console.error('%s=> update <%s> status to isRquesterDon error: %s',
+						config.masterName, taskDetail.taskNodeName, error.message);
+					reject(error);
+					return;
+				}
+
+				console.log('%s=> update <%s> status to isRquesterDone',
+					config.masterName, taskDetail.taskNodeName);
+				resolve(taskDetail);
+			});
+	});
+}
+
 
 function removeTask(taskDetial){
 	return new Promise(function(resolve, reject){
@@ -1206,6 +1243,7 @@ function resetAndReturnToTasks(taskDetail){
 		var assignedPath = taskDetail.assignedPath;
 		var assignToWho = taskDetail.assignToWho;
 
+		taskDetail.isDispatchedToWorker = false;
 		taskDetail.assignToWho = '';
 		taskDetail.assignedPath = '';
 

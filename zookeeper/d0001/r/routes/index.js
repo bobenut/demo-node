@@ -14,8 +14,18 @@ router.post('/task/overtime', function(req, res, next){
 	var followOvertimeTask = {
 		taskName:'followOvertime',
 		time:req.body.time,
+		taskNodeName:'',
+		isDispatchedToWorker:false,
+		isWorkerDone:false,
+		isResponsing:false,
+		isResponsedToRquester:false,
+		isRquesterDone:false,
 		assignToWho:'',
 		responseToWho:'',
+		taskDispatchingPath:''
+		assignedPath:'',
+		taskResponsingPath:'',
+		responseTaskPath:''
 	};
 
 	console.log("followOvertimeTask: %s", JSON.stringify(followOvertimeTask, null, 2));
