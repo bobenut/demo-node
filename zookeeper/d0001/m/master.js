@@ -1264,6 +1264,30 @@ function resetAndReturnToTasks(taskDetail){
 	});
 }
 
+function synTasks(){
+
+}
+
+function synTask(taskDetail){
+	var synFuncs = [synAssignedTask];
+
+	for(var i= 0, synFunc; synFunc = synFuncs[i++];){
+		if(synFunc(taskDetail)){
+			break;
+		}
+	}
+}
+
+function synAssignedTask(taskDetail){
+	if(!(taskDetail.isDispatchedToWorker == true &&
+	   taskDetail.isWorkerDone ==false)){
+		return false;
+	}
+
+
+
+}
+
 
 
 
