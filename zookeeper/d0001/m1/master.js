@@ -746,16 +746,16 @@ function takeDoneTaskToResponsing(assignedTaskPath){
 }
 
 function taskDoneTaskToResponsing(taskDetail){
-	var taskNodeNo = takeOutTaskNo(taskDetail.taskNodeName);
-	var requesterName = allocateRequesterForTask(taskNodeNo);
-
-	taskDetail.isResponsing = true;
-	taskDetail.isWorkerDone = true;
-	taskDetail.taskResponsingPath = config.tasksResponsingPath + '/' + taskDetail.taskNodeName;
-	// console.log('####3');
-	// console.log('tasksResponsingPath=%s, taskResponsingPath=%s', taskDetail.taskResponsingPath, taskDetail.taskDispatchingPath);
-
 	return new Promise(function(resolve, reject){
+		var taskNodeNo = takeOutTaskNo(taskDetail.taskNodeName);
+		var requesterName = allocateRequesterForTask(taskNodeNo);
+
+		taskDetail.isResponsing = true;
+		taskDetail.isWorkerDone = true;
+		taskDetail.taskResponsingPath = config.tasksResponsingPath + '/' + taskDetail.taskNodeName;
+		// console.log('####3');
+		// console.log('tasksResponsingPath=%s, taskResponsingPath=%s', taskDetail.taskResponsingPath, taskDetail.taskDispatchingPath);
+
 		zkClient.transaction()
 			.create(
 				taskDetail.taskResponsingPath,
@@ -1304,7 +1304,7 @@ function syncTasksForAll(taskNodeNames){
 
 function syncTask(taskDetail){
 	return new Promise(function(resolve, reject){
-		var syncFuncs = [synAssignedNotDoneTask];
+		var syncFuncs = [synAssignedNotDoneTask, synAssignedDoneNotResponsingTask];
 
 		Promise.map(syncFuncs, function(syncFunc, index){
 			return syncFunc(taskDetail);
@@ -1397,6 +1397,28 @@ function synAssignedNotDoneTask_updateAssignedDoneTask(taskDetail){
 					config.masterName, taskDetail.taskNodeName);
 
 				resolve(taskDetail);
+			});
+	});
+}
+
+function  synAssignedDoneNotResponsingTask(taskDetail){
+	return new Promise(function(resolve, reject){
+		if(!(taskDetail.isDispatchedToWorker == true &&
+			taskDetail.isWorkerDone ==true &&
+			taskDetail.isResponsing ==false )){
+			resolve(taskDetail);
+		}
+
+		taskDoneTaskToResponsing(taskDetail)
+			.then(function(taskDetail){
+				console.log('%s=> sync assiged done task ok',
+					config.masterName, taskDetail.taskNodeName);
+				resolve(taskDetail);
+			})
+			.catch(function(error){
+				console.error('%s=> sync assiged done task error: %s',
+					config.masterName, error.message);
+				reject(error);
 			});
 	});
 }
