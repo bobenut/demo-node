@@ -2,7 +2,7 @@ var crypto = require('crypto');
 
 function cipher(algorithm, data, key, inputEncoding, outputEncoding) {
     inputEncoding = inputEncoding || 'utf8';
-    outputEncoding = outputEncoding || 'hex';
+    outputEncoding = outputEncoding || 'base64';
 
     const cipher = crypto.createCipher(algorithm, key);
     var encrypted = cipher.update(data, inputEncoding, outputEncoding);
@@ -12,7 +12,7 @@ function cipher(algorithm, data, key, inputEncoding, outputEncoding) {
 }
 
 function decipher(algorithm, encrypteData, key, inputEncoding, outputEncoding) {
-    inputEncoding = inputEncoding || 'hex';
+    inputEncoding = inputEncoding || 'base64';
     outputEncoding = outputEncoding || 'utf8';
 
     const decipher = crypto.createDecipher(algorithm, key);
@@ -22,9 +22,9 @@ function decipher(algorithm, encrypteData, key, inputEncoding, outputEncoding) {
     return decrypted;
 }
 
-var algorithm = 'aes-192-cbc',
-    data = 'abC1!2@3#',
-    key = 'mnB21@gb.com';
+var algorithm = 'aes-128-ecb',
+    data = 'aaaaaaaaaaaaaaaa',
+    key = 'bbbbbbbbbbbbbbbb';
 
 var encryptedData = cipher(algorithm, data, key);
 console.log('encrypted: ' + encryptedData);
