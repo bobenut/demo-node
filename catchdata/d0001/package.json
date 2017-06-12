@@ -1,0 +1,22 @@
+{
+  "name": "catchdata",
+  "version": "1.0.0",
+  "description": "catchdata",
+  "main": "main-get-bill.js",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "iconv-lite": "^0.2.11",
+    "qs": "^1.2.0",
+    "restler": "^3.4.0",
+    "sax": "^0.5.8",
+    "xml2js": "^0.4.0",
+    "xmlbuilder": "^9.0.0",
+    "yaml": "^0.2.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "bobenut",
+  "license": "MIT"
+}
