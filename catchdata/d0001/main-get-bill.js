@@ -128,8 +128,8 @@ function answerRdcode(rdcodeFilename){
     rest.post('http://api.ysdm.net/create.json', {
         multipart: true,
         data: {
-          'username': 'hbabaoh',
-          'password': 'abc123456789',
+          'username': 'hba',
+          'password': 'ab',
           'typeid':'5000',
           'softid': '1',
           'softkey': 'b40ffbee5c1cf4e38028c197eb2fc751',
