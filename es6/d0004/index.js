@@ -1,5 +1,6 @@
 //特性
 //1.键值对，键可以是对象
+console.log('-----特性，键可以是对象')
 const map1 = new Map()
 const objkey = {p1: 'v1'}
 
@@ -8,6 +9,7 @@ console.log(map1.get(objkey))
 //对象是按照引用地址来做识别
 
 //2.Map可以接受数组作为参数，数组成员还是一个数组，其中有两个元素，一个表示键一个表示值
+console.log('-----特性，接受数组作为参数')
 const map2 = new Map([
   ['name', 'Aissen'],
   ['age', 12]
@@ -17,13 +19,15 @@ console.log(map2.get('age'))
 
 //操作
 //size
+console.log('-----操作，size')
 const map3 = new Map();
 map3.set('k1', 1);
 map3.set('k2', 2);
 map3.set('k3', 3);
-console.log('map3 size: %s', map3.size)
+console.log('%s', map3.size)
 
 //set设置键值对，键可以是各种类型
+console.log('-----操作，set')
 const map4 = new Map();
 map4.set('k1', 6)        // 键是字符串
 map4.set(222, '哈哈哈')     // 键是数值
@@ -37,27 +41,32 @@ console.log('undefined value: %s', map4.get(undefined))
 console.log('fun value: %s', map4.get(fun))
 
 //链式调用
+console.log('-----操作，set链式调用')
 map4.set('k2', 2).set('k3', 4).set('k4', 5)
 console.log('map4 size: %s', map4.size)
 
 //get
+console.log('-----操作，get')
 const map5 = new Map();
 map5.set('k1', 6)  
 console.log('map5 value: %s', map5.get('k1'))
 
 //has
+console.log('-----操作，has')
 const map6 = new Map();
 map6.set(undefined, 4)
 console.log('map6 undefined: %s', map6.has(undefined))
 console.log('map6 no exited: %s', map6.has('k1'))
 
 //delete
+console.log('-----操作，delete')
 const map7 = new Map();
 map7.set(undefined, 4)
 map7.delete(undefined)
 console.log('map7 undefined: %s', map7.has(undefined))
 
 //clear
+console.log('-----操作，clear')
 const map8 = new Map();
 map8.set('k1', 1);
 map8.set('k2', 2);
@@ -84,9 +93,14 @@ for (let value of map9.values()) {
 }
 
 //entries()
-console.log('-----entries()')
+console.log('-----entries() 1')
 for (let item of map9.entries()) {
   console.log(item[0], item[1]);
+}
+
+console.log('-----entries() 2')
+for (let [key, value] of map9.entries()) {
+  console.log(key, value);
 }
 
 //forEach()
@@ -158,7 +172,7 @@ const set = new Set([
   ['foo', 1],
   ['bar', 2]
 ]);
-const map13 = new Map(set);
+const map13 = new Map(set)
 console.log(map13)
 
 //Map To Set
