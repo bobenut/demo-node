@@ -2,3 +2,9 @@
 *node_modules*
 npm-debug.log
 catchdata/d0001/2d
+agenda/d0001/agendash-server/db/mongo/agenda-data/mongod.lock
+agenda/d0001/agendash-server/db/mongo/agenda-data/WiredTiger.lock
+agenda/d0001/agendash-server/db/mongo/agenda-data/diagnostic.data/metrics.2017-08-21T10-37-22Z-00000
+agenda/d0001/agendash-server/db/mongo/agenda-data/journal/WiredTigerLog.0000000001
+agenda/d0001/agendash-server/db/mongo/agenda-data/journal/WiredTigerPreplog.0000000002
+agenda/d0001/agendash-server/db/mongo/agenda-data/journal/WiredTigerPreplog.0000000001
