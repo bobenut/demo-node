@@ -1,0 +1,2 @@
+dbpath=./agenda-data
+logpath=./agenda-data/mongodb.log
