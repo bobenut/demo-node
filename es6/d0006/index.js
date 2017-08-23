@@ -15,19 +15,20 @@ console.log('%s', Array.from(set1))
 
 console.log('-----step3，转换字符串')
 console.log('%s', Array.from('hello world'))
+console.log('%s', Array.from('\u767d\u8272\u7684\u6d77'))
 
 console.log('-----step4，类数组对象')
 
 console.log('%s', Array.from({
   0: '0',
   1: '1',
-  length:2
+  3: '3',
+  length:4
 }))
 
 console.log('%s', Array.from({
-  '0': 0,
-  '1': 1,
-  length:2
+  0: 0,
+  1: 1
 }))
 
 console.log('%s', Array.from({
@@ -43,7 +44,7 @@ console.log('%s', Array.from([1, 2, 3, 4, 5], (n) => n + 1))
 
 console.log('-----step6，第三个参数作用，绑定this')
 
-let aop = {
+let diObj = {
   handle: function(n){
     return n + 2
   }
@@ -53,4 +54,4 @@ console.log('%s', Array.from(
   function (x){
     return this.handle(x)
   }, 
-  aop))
+  diObj))
