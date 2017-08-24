@@ -1,0 +1,39 @@
+2017-08-22T17:16:20.788+0800 I CONTROL  [initandlisten] MongoDB starting : pid=9724 port=27017 dbpath=./agenda-data 64-bit host=dell-xps
+2017-08-22T17:16:20.788+0800 I CONTROL  [initandlisten] targetMinOS: Windows 7/Windows Server 2008 R2
+2017-08-22T17:16:20.789+0800 I CONTROL  [initandlisten] db version v3.2.5
+2017-08-22T17:16:20.789+0800 I CONTROL  [initandlisten] git version: 34e65e5383f7ea1726332cb175b73077ec4a1b02
+2017-08-22T17:16:20.789+0800 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 1.0.1p-fips 9 Jul 2015
+2017-08-22T17:16:20.789+0800 I CONTROL  [initandlisten] allocator: tcmalloc
+2017-08-22T17:16:20.789+0800 I CONTROL  [initandlisten] modules: none
+2017-08-22T17:16:20.789+0800 I CONTROL  [initandlisten] build environment:
+2017-08-22T17:16:20.790+0800 I CONTROL  [initandlisten]     distmod: 2008plus-ssl
+2017-08-22T17:16:20.790+0800 I CONTROL  [initandlisten]     distarch: x86_64
+2017-08-22T17:16:20.790+0800 I CONTROL  [initandlisten]     target_arch: x86_64
+2017-08-22T17:16:20.790+0800 I CONTROL  [initandlisten] options: { config: "mongodb.cnf", storage: { dbPath: "./agenda-data" }, systemLog: { destination: "file", path: "./agenda-data/mongodb.log" } }
+2017-08-22T17:16:20.796+0800 I -        [initandlisten] Detected data files in ./agenda-data created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2017-08-22T17:16:20.798+0800 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=4G,session_max=20000,eviction=(threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),checkpoint=(wait=60,log_size=2GB),statistics_log=(wait=0),
+2017-08-22T17:16:21.288+0800 I CONTROL  [initandlisten] 
+2017-08-22T17:16:21.288+0800 I CONTROL  [initandlisten] ** WARNING: Insecure configuration, access control is not enabled and no --bind_ip has been specified.
+2017-08-22T17:16:21.288+0800 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted, 
+2017-08-22T17:16:21.288+0800 I CONTROL  [initandlisten] **          and the server listens on all available network interfaces.
+2017-08-22T17:16:21.288+0800 I CONTROL  [initandlisten] 
+2017-08-22T17:16:21.306+0800 I NETWORK  [HostnameCanonicalizationWorker] Starting hostname canonicalization worker
+2017-08-22T17:16:21.306+0800 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory './agenda-data/diagnostic.data'
+2017-08-22T17:16:21.309+0800 I NETWORK  [initandlisten] waiting for connections on port 27017
+2017-08-22T17:17:27.991+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57029 #1 (1 connection now open)
+2017-08-22T17:17:28.021+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57030 #2 (2 connections now open)
+2017-08-22T17:25:38.253+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:57148 #3 (3 connections now open)
+2017-08-22T18:04:34.599+0800 I NETWORK  [conn1] end connection 127.0.0.1:57029 (2 connections now open)
+2017-08-22T18:04:34.600+0800 I NETWORK  [conn3] end connection 127.0.0.1:57148 (2 connections now open)
+2017-08-22T18:04:34.600+0800 I NETWORK  [conn2] end connection 127.0.0.1:57030 (1 connection now open)
+2017-08-22T18:04:36.722+0800 I CONTROL  [thread1] CTRL_CLOSE_EVENT signal
+2017-08-22T18:04:36.722+0800 I CONTROL  [consoleTerminate] got CTRL_CLOSE_EVENT, will terminate after current cmd ends
+2017-08-22T18:04:36.723+0800 I FTDC     [consoleTerminate] Shutting down full-time diagnostic data capture
+2017-08-22T18:04:36.738+0800 I CONTROL  [consoleTerminate] now exiting
+2017-08-22T18:04:36.739+0800 I NETWORK  [consoleTerminate] shutdown: going to close listening sockets...
+2017-08-22T18:04:36.739+0800 I NETWORK  [consoleTerminate] closing listening socket: 584
+2017-08-22T18:04:36.739+0800 I NETWORK  [consoleTerminate] shutdown: going to flush diaglog...
+2017-08-22T18:04:36.739+0800 I NETWORK  [consoleTerminate] shutdown: going to close sockets...
+2017-08-22T18:04:36.740+0800 I STORAGE  [consoleTerminate] WiredTigerKVEngine shutting down
+2017-08-22T18:04:36.927+0800 I STORAGE  [consoleTerminate] shutdown: removing fs lock...
+2017-08-22T18:04:36.928+0800 I CONTROL  [consoleTerminate] dbexit:  rc: 12

@@ -1,0 +1,65 @@
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] MongoDB starting : pid=12700 port=27017 dbpath=./agenda-data 64-bit host=dell-xps
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] targetMinOS: Windows 7/Windows Server 2008 R2
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] db version v3.2.5
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] git version: 34e65e5383f7ea1726332cb175b73077ec4a1b02
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] OpenSSL version: OpenSSL 1.0.1p-fips 9 Jul 2015
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] allocator: tcmalloc
+2017-08-23T14:20:43.508+0800 I CONTROL  [initandlisten] modules: none
+2017-08-23T14:20:43.509+0800 I CONTROL  [initandlisten] build environment:
+2017-08-23T14:20:43.509+0800 I CONTROL  [initandlisten]     distmod: 2008plus-ssl
+2017-08-23T14:20:43.509+0800 I CONTROL  [initandlisten]     distarch: x86_64
+2017-08-23T14:20:43.509+0800 I CONTROL  [initandlisten]     target_arch: x86_64
+2017-08-23T14:20:43.509+0800 I CONTROL  [initandlisten] options: { config: "mongodb.cnf", storage: { dbPath: "./agenda-data" }, systemLog: { destination: "file", path: "./agenda-data/mongodb.log" } }
+2017-08-23T14:20:43.512+0800 I -        [initandlisten] Detected data files in ./agenda-data created by the 'wiredTiger' storage engine, so setting the active storage engine to 'wiredTiger'.
+2017-08-23T14:20:43.513+0800 I STORAGE  [initandlisten] wiredtiger_open config: create,cache_size=4G,session_max=20000,eviction=(threads_max=4),config_base=false,statistics=(fast),log=(enabled=true,archive=true,path=journal,compressor=snappy),file_manager=(close_idle_time=100000),checkpoint=(wait=60,log_size=2GB),statistics_log=(wait=0),
+2017-08-23T14:20:43.827+0800 I CONTROL  [initandlisten] 
+2017-08-23T14:20:43.827+0800 I CONTROL  [initandlisten] ** WARNING: Insecure configuration, access control is not enabled and no --bind_ip has been specified.
+2017-08-23T14:20:43.827+0800 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted, 
+2017-08-23T14:20:43.827+0800 I CONTROL  [initandlisten] **          and the server listens on all available network interfaces.
+2017-08-23T14:20:43.827+0800 I CONTROL  [initandlisten] 
+2017-08-23T14:20:43.846+0800 I NETWORK  [HostnameCanonicalizationWorker] Starting hostname canonicalization worker
+2017-08-23T14:20:43.846+0800 I FTDC     [initandlisten] Initializing full-time diagnostic data capture with directory './agenda-data/diagnostic.data'
+2017-08-23T14:20:43.849+0800 I NETWORK  [initandlisten] waiting for connections on port 27017
+2017-08-23T14:21:43.800+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54186 #1 (1 connection now open)
+2017-08-23T14:21:43.833+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54187 #2 (2 connections now open)
+2017-08-23T15:02:37.555+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54583 #3 (3 connections now open)
+2017-08-23T15:03:09.910+0800 I NETWORK  [conn3] end connection 127.0.0.1:54583 (2 connections now open)
+2017-08-23T15:03:43.192+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54605 #4 (3 connections now open)
+2017-08-23T15:03:43.225+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54606 #5 (4 connections now open)
+2017-08-23T15:04:39.941+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54613 #6 (5 connections now open)
+2017-08-23T15:05:10.226+0800 I NETWORK  [conn5] end connection 127.0.0.1:54606 (4 connections now open)
+2017-08-23T15:05:10.226+0800 I NETWORK  [conn4] end connection 127.0.0.1:54605 (4 connections now open)
+2017-08-23T15:05:12.041+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54618 #7 (4 connections now open)
+2017-08-23T15:05:12.077+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54619 #8 (5 connections now open)
+2017-08-23T15:05:36.386+0800 I NETWORK  [conn8] end connection 127.0.0.1:54619 (4 connections now open)
+2017-08-23T15:05:36.386+0800 I NETWORK  [conn7] end connection 127.0.0.1:54618 (4 connections now open)
+2017-08-23T15:28:34.751+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:54897 #9 (4 connections now open)
+2017-08-23T15:28:45.227+0800 I NETWORK  [conn9] end connection 127.0.0.1:54897 (3 connections now open)
+2017-08-23T15:42:01.156+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55021 #10 (4 connections now open)
+2017-08-23T15:42:01.196+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55022 #11 (5 connections now open)
+2017-08-23T15:42:01.218+0800 I NETWORK  [conn10] end connection 127.0.0.1:55021 (4 connections now open)
+2017-08-23T15:42:01.218+0800 I NETWORK  [conn11] end connection 127.0.0.1:55022 (4 connections now open)
+2017-08-23T15:42:29.172+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55026 #12 (4 connections now open)
+2017-08-23T15:42:29.209+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55027 #13 (5 connections now open)
+2017-08-23T15:42:29.221+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55028 #14 (6 connections now open)
+2017-08-23T15:42:46.941+0800 I NETWORK  [conn12] end connection 127.0.0.1:55026 (5 connections now open)
+2017-08-23T15:42:46.941+0800 I NETWORK  [conn14] end connection 127.0.0.1:55028 (5 connections now open)
+2017-08-23T15:42:46.942+0800 I NETWORK  [conn13] end connection 127.0.0.1:55027 (5 connections now open)
+2017-08-23T15:43:34.483+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55048 #15 (4 connections now open)
+2017-08-23T15:43:34.519+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55049 #16 (5 connections now open)
+2017-08-23T15:43:34.530+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55050 #17 (6 connections now open)
+2017-08-23T15:44:27.058+0800 I NETWORK  [conn15] end connection 127.0.0.1:55048 (5 connections now open)
+2017-08-23T15:44:27.058+0800 I NETWORK  [conn16] end connection 127.0.0.1:55049 (5 connections now open)
+2017-08-23T15:44:27.059+0800 I NETWORK  [conn17] end connection 127.0.0.1:55050 (4 connections now open)
+2017-08-23T15:44:37.517+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55079 #18 (4 connections now open)
+2017-08-23T15:44:37.552+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55080 #19 (5 connections now open)
+2017-08-23T15:44:37.561+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55081 #20 (6 connections now open)
+2017-08-23T15:45:45.863+0800 I NETWORK  [conn18] end connection 127.0.0.1:55079 (5 connections now open)
+2017-08-23T15:45:45.863+0800 I NETWORK  [conn20] end connection 127.0.0.1:55081 (5 connections now open)
+2017-08-23T15:45:45.864+0800 I NETWORK  [conn19] end connection 127.0.0.1:55080 (5 connections now open)
+2017-08-23T16:04:12.950+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55794 #21 (4 connections now open)
+2017-08-23T16:04:12.987+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55795 #22 (5 connections now open)
+2017-08-23T16:04:13.000+0800 I NETWORK  [initandlisten] connection accepted from 127.0.0.1:55796 #23 (6 connections now open)
+2017-08-23T16:04:31.598+0800 I NETWORK  [conn21] end connection 127.0.0.1:55794 (5 connections now open)
+2017-08-23T16:04:31.598+0800 I NETWORK  [conn23] end connection 127.0.0.1:55796 (5 connections now open)
+2017-08-23T16:04:31.598+0800 I NETWORK  [conn22] end connection 127.0.0.1:55795 (5 connections now open)
