@@ -1,5 +1,5 @@
 var agenda = require('../core/agenda-base').agenda;
-const processorName = 'agp2';
+const processorName = 'agp1';
 
 agenda.define('timeout-job', {lockLifetime: 2000}, (job, done) => {
   let beginDate = new Date()
@@ -22,15 +22,15 @@ agenda.define('timeout-job', {lockLifetime: 2000}, (job, done) => {
 });
 
 const configProcessors = () => {
-  // agenda.jobs({name: 'timeout-job'}, (err, jobs) => {
-  //     if(jobs.length == 0) {
-  //       console.log('create new timeout-job')
-  //       agenda.every('5 seconds', 'timeout-job', {tasks:[]});
-  //     } else {
-  //       console.log('update timeout-job')
-  //       agenda.every('5 seconds', 'timeout-job', jobs[0].attrs.data);
-  //     }
-  // })
+  agenda.jobs({name: 'timeout-job'}, (err, jobs) => {
+      if(jobs.length == 0) {
+        console.log('create new timeout-job')
+        agenda.every('5 seconds', 'timeout-job', {tasks:[]});
+      } else {
+        console.log('update timeout-job')
+        agenda.every('5 seconds', 'timeout-job', jobs[0].attrs.data);
+      }
+  })
 }
 
 agenda.on('ready', () => {
